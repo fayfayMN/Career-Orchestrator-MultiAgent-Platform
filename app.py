@@ -34,7 +34,7 @@ if st.button("Analyze Gaps"):
             
             with st.spinner("Agent 1 (The Auditor) is identifying gaps..."):
                 prompt = f"Compare Resume: {resume_text} to JD: {jd_text}. List 3 skill gaps."
-                response = llm.predict(prompt)
+                response = llm.invoke(prompt).content
                 st.subheader("🚩 The Gap Analysis")
                 st.write(response)
                 
