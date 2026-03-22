@@ -18,25 +18,38 @@ with col1:
 with col2:
     jd_text = st.text_area("Paste Job Description:", height=300)
 
-if st.button("Analyze Gaps"):
+# Updated Multi-Agent Button Logic
+if st.button("Analyze Gaps & Build Syllabus"):
     if not deepseek_api_key:
         st.error("Please enter your DeepSeek API Key in the sidebar.")
     elif not resume_text or not jd_text:
         st.warning("Please provide both a resume and a job description.")
     else:
         try:
-            # Bridging to DeepSeek's server
             llm = ChatOpenAI(
                 model_name="deepseek-chat", 
                 openai_api_key=deepseek_api_key, 
                 openai_api_base="https://api.deepseek.com"
             )
             
+            # --- AGENT 1: THE AUDITOR ---
             with st.spinner("Agent 1 (The Auditor) is identifying gaps..."):
                 prompt = f"Compare Resume: {resume_text} to JD: {jd_text}. List 3 skill gaps."
-                response = llm.invoke(prompt).content
+                gaps = llm.invoke(prompt).content
                 st.subheader("🚩 The Gap Analysis")
-                st.write(response)
+                st.write(gaps)
+                
+            # --- AGENT 2: THE TUTOR ---
+            with st.spinner("Agent 2 (The Tutor) is creating your syllabus..."):
+                tutor_prompt = f"""
+                You are an expert technical instructor. Based on these gaps: {gaps}
+                Create a blunt, practical 48-hour rapid upskilling plan to bridge them.
+                Include specific resource names (YouTube, documentation, etc.).
+                """
+                syllabus = llm.invoke(tutor_prompt).content
+                st.divider()
+                st.subheader("📚 Your 48-Hour Rapid Upskilling Plan")
+                st.write(syllabus)
                 
         except Exception as e:
             st.error(f"An error occurred: {e}")
