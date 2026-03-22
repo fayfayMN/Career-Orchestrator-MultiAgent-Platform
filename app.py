@@ -1,3 +1,12 @@
+import sys
+import os
+
+# Adds the current directory to the Python path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# Now try the import again
+from agents.auditor import perform_audit
+
 import streamlit as st
 from langchain_openai import ChatOpenAI
 
