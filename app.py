@@ -53,3 +53,29 @@ if st.button("Analyze Gaps & Build Syllabus"):
                 
         except Exception as e:
             st.error(f"An error occurred: {e}")
+
+# app.py
+import streamlit as st
+from agents.auditor import perform_audit
+from agents.storyteller import draft_star_bullets
+
+st.title("Career Orchestrator: Phase 2")
+
+# 1. Input Section
+job_desc = st.text_area("Paste Job Description Here")
+uploaded_resume = st.file_uploader("Upload Master Resume (JSON/PDF)")
+
+if st.button("Generate Resilience Narrative"):
+    # STEP 1: The Auditor identifies matches and gaps [cite: 187]
+    gaps = perform_audit(uploaded_resume, job_desc)
+    st.write("### Gap Analysis Complete")
+    st.dataframe(gaps)
+
+    # STEP 2: The Storyteller drafts the "Bridge" [cite: 189, 191]
+    with st.spinner("Agent 3 is drafting your STAR stories..."):
+        new_bullets = draft_star_bullets(uploaded_resume, gaps, job_desc)
+        
+    st.write("### Your STAR-Method Bullets")
+    st.info(new_bullets)
+    
+    # NEXT STEP: Pass this to Agent 4 (Voice Filter) for refinement [cite: 192]
