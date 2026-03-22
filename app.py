@@ -1,47 +1,30 @@
 
 import streamlit as st
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI # DeepSeek uses the OpenAI format
 
-# 1. Setup the Page (The Professional Look)
 st.set_page_config(page_title="Career Orchestrator", page_icon="🤖")
-st.title("🚀 Career Orchestrator: Bridge the Gap")
-st.markdown("Finding the 'blind spots' in your application using Multi-Agent AI.")
+st.title("🚀 Career Orchestrator: DeepSeek Edition")
 
-# 2. Sidebar for API Keys (Practical Security)
 with st.sidebar:
-    openai_api_key = st.text_input("OpenAI API Key", type="password")
-    st.info("Your key is used only for this session.")
+    # Rename the input for clarity
+    deepseek_api_key = st.text_input("DeepSeek API Key", type="password")
 
-# 3. Input Section (The Auditor's Data)
-col1, col2 = st.columns(2)
-with col1:
-    resume_text = st.text_area("Paste your Master Resume here:", height=300)
-with col2:
-    jd_text = st.text_area("Paste the Job Description here:", height=300)
+# Input Section
+resume_text = st.text_area("Paste Resume:")
+jd_text = st.text_area("Paste Job Description:")
 
-# 4. Agent 1: The Auditor Logic
-if st.button("Analyze Gaps"):
-    if not openai_api_key:
-        st.error("Please add your OpenAI API key to continue.")
+if st.button("Analyze with DeepSeek"):
+    if not deepseek_api_key:
+        st.error("Please add your DeepSeek key.")
     else:
-        llm = ChatOpenAI(model_name="gpt-4o", openai_api_key=openai_api_key)
+        # We tell LangChain to talk to DeepSeek's server instead of OpenAI's
+        llm = ChatOpenAI(
+            model_name="deepseek-chat", 
+            openai_api_key=deepseek_api_key, 
+            openai_api_base="https://api.deepseek.com"
+        )
         
-        auditor_prompt = f"""
-        Compare this Resume: {resume_text} 
-        Against this Job Description: {jd_text}
-        Identify the 3 most critical 'Gaps' (missing skills or experiences).
-        Be blunt and practical.
-        """
-        
-        with st.spinner("The Auditor is analyzing your gaps..."):
+        with st.spinner("The Auditor (DeepSeek) is analyzing..."):
+            auditor_prompt = f"Resume: {resume_text} \nJD: {jd_text} \nIdentify 3 skill gaps."
             gaps = llm.predict(auditor_prompt)
-            st.subheader("🚩 Identified Gaps")
             st.write(gaps)
-
-        # 5. Agent 2: The Tutor (The Bridge)
-        st.divider()
-        st.subheader("📚 48-Hour Learning Syllabus")
-        tutor_prompt = f"Based on these gaps: {gaps}, create a 48-hour rapid upskilling plan."
-        syllabi = llm.predict(tutor_prompt)
-        st.write(syllabi)
