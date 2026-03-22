@@ -1,30 +1,42 @@
-
 import streamlit as st
-from langchain_openai import ChatOpenAI # DeepSeek uses the OpenAI format
+from langchain_openai import ChatOpenAI
 
 st.set_page_config(page_title="Career Orchestrator", page_icon="🤖")
 st.title("🚀 Career Orchestrator: DeepSeek Edition")
+st.markdown("Bridging the gap between your resume and the job market.")
 
+# Sidebar for the DeepSeek Key
 with st.sidebar:
-    # Rename the input for clarity
+    st.header("Settings")
     deepseek_api_key = st.text_input("DeepSeek API Key", type="password")
+    st.info("Get your key at platform.deepseek.com")
 
 # Input Section
-resume_text = st.text_area("Paste Resume:")
-jd_text = st.text_area("Paste Job Description:")
+col1, col2 = st.columns(2)
+with col1:
+    resume_text = st.text_area("Paste Master Resume:", height=300)
+with col2:
+    jd_text = st.text_area("Paste Job Description:", height=300)
 
-if st.button("Analyze with DeepSeek"):
+if st.button("Analyze Gaps"):
     if not deepseek_api_key:
-        st.error("Please add your DeepSeek key.")
+        st.error("Please enter your DeepSeek API Key in the sidebar.")
+    elif not resume_text or not jd_text:
+        st.warning("Please provide both a resume and a job description.")
     else:
-        # We tell LangChain to talk to DeepSeek's server instead of OpenAI's
-        llm = ChatOpenAI(
-            model_name="deepseek-chat", 
-            openai_api_key=deepseek_api_key, 
-            openai_api_base="https://api.deepseek.com"
-        )
-        
-        with st.spinner("The Auditor (DeepSeek) is analyzing..."):
-            auditor_prompt = f"Resume: {resume_text} \nJD: {jd_text} \nIdentify 3 skill gaps."
-            gaps = llm.predict(auditor_prompt)
-            st.write(gaps)
+        try:
+            # Bridging to DeepSeek's server
+            llm = ChatOpenAI(
+                model_name="deepseek-chat", 
+                openai_api_key=deepseek_api_key, 
+                openai_api_base="https://api.deepseek.com"
+            )
+            
+            with st.spinner("Agent 1 (The Auditor) is identifying gaps..."):
+                prompt = f"Compare Resume: {resume_text} to JD: {jd_text}. List 3 skill gaps."
+                response = llm.predict(prompt)
+                st.subheader("🚩 The Gap Analysis")
+                st.write(response)
+                
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
