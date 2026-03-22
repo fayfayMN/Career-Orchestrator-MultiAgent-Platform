@@ -1,27 +1,40 @@
-# Career-Orchestrator-MultiAgent-Platform
-A multi-agent system (Auditor, Tutor, Storyteller, Voice Filter, Critic, Coach) designed to bridge systemic gaps in hiring and preserve human authenticity through reflection and reasoning.
-# 🤖 Personal Career Agent: The Multi-Agent Workflow
-**Bridging the Gap between Hidden Talent and Automated Hiring Filters.**
+🚀 Career Orchestrator: Multi-Agent AI Strategy Engine
+Bridging the gap between hidden talent and automated hiring filters through high-fidelity agentic reasoning.
 
-## 📌 The Mission
-Traditional hiring filters often create "blind spots" for high-resilience candidates—including first-generation students and TRIO scholars. This platform is a multi-agent system designed to audit job requirements, generate rapid-upskilling syllabi, and preserve the user's authentic voice in the application process.
+📌 The Mission
+Traditional ATS (Applicant Tracking Systems) often create "blind spots" for high-resilience candidates. This platform uses a 7-Agent Pipeline to audit job requirements, generate rapid-upskilling syllabi, and preserve a candidate's authentic voice through advanced reflection and multimodal interaction.
 
-## 🧠 System Architecture (Agentic Workflow)
-This platform utilizes a 6-agent loop to ensure accuracy, honesty, and human-centric storytelling:
+🧠 System Architecture (The "Gatekeeper" Workflow)
+Unlike standard LLM wrappers, this system utilizes a Conditional Execution Pipeline to ensure data integrity and computational efficiency:
 
-1. **The Auditor:** Analyzes the Job Description against the Master Resume to identify "The Gap".
-2. **The Tutor:** Generates a **48-Hour Learning Syllabus** to bridge technical skill gaps.
-3. **The Storyteller:** Drafts high-impact bullet points and cover letters based on matching skills.
-4. **The Voice Filter:** Strips away "AI-sounding" corporate buzzwords to restore the user's authentic tone.
-5. **The Critic:** A human-in-the-loop agent that checks for hallucinations, "AI-tone," or inaccuracies.
-6. **The Coach:** Provides tailored interview preparation and manages the application lifecycle.
+The Auditor (JSON-Based): Performs a semantic gap analysis. New: Acts as the "Gatekeeper"—if the match score is <60%, the pipeline halts to prevent hallucination.
 
-## 🛠️ Tech Stack & Patterns
-* **Logic:** Multi-agent Orchestration (LangChain/Python).
-* **Patterns:** Reflection (The Critic), Tool-Use (The Tutor), and Personalization (The Voice Filter).
-* **UI:** Streamlit Case Management Dashboard.
+The Tutor: Generates a 48-Hour Learning Syllabus to bridge specific technical gaps identified in Step 1.
 
-## 📈 Roadmap (Innovation Studio Focus)
-* [ ] **Phase 1:** Core "Auditor" and "Storyteller" logic.
-* [ ] **Phase 2:** "Voice Filter" training to align with human resilience narratives.
-* [ ] **Phase 3:** Full Dashboard integration with Interview Prep coaching.
+The Storyteller: Drafts high-impact STAR-method bullets and professional artifacts.
+
+The Voice Filter: Strips away "AI-sounding" buzzwords, restoring the user’s authentic, resilient tone.
+
+The Fact-Checker: A critical reflection agent that cross-references all generated stories against the raw Master Resume for 100% accuracy.
+
+The Cover Letter Composer: Synthesizes the narrative into a formal, company-specific application.
+
+The Interview Coach: Generates technical "grills" and behavioral prompts. New: Includes a "Professional Hint Layer" to train students in industry-standard communication.
+
+🛠️ Tech Stack & Advanced Patterns
+Logic: Multi-agent Orchestration (Python/DeepSeek API).
+
+Patterns: Gatekeeper Logic (Conditional branching), Reflection (The Fact-Checker), and Structured Output (Strict JSON parsing).
+
+Multimodal I/O: * Audio: Integrated gTTS (Text-to-Speech) for interviewer voice-over.
+
+Voice: Integrated streamlit-mic-recorder (Speech-to-Text) for live interview practice.
+
+Output: Automated .docx report generation via python-docx.
+
+📈 Status: Phase 3 Complete (Production Ready)
+✅ Phase 1: Core "Auditor" and "Storyteller" logic with JSON parsing.
+
+✅ Phase 2: "Voice Filter" and "Fact-Checker" reflection loop.
+
+✅ Phase 3: Full Multimodal Dashboard with Voice-to-Text Interviewing and Gatekeeper Scoring.
