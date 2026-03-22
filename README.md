@@ -1,9 +1,9 @@
 🚀 Career Orchestrator: Multi-Agent AI Strategy Engine
 Bridging the gap between hidden talent and automated hiring filters through high-fidelity agentic reasoning.
-
+---
 📌 The Mission
 Traditional ATS (Applicant Tracking Systems) often create "blind spots" for high-resilience candidates. This platform uses a 7-Agent Pipeline to audit job requirements, generate rapid-upskilling syllabi, and preserve a candidate's authentic voice through advanced reflection and multimodal interaction.
-
+---
 🧠 System Architecture (The "Gatekeeper" Workflow)
 Unlike standard LLM wrappers, this system utilizes a Conditional Execution Pipeline to ensure data integrity and computational efficiency:
 
@@ -20,7 +20,7 @@ The Fact-Checker: A critical reflection agent that cross-references all generate
 The Cover Letter Composer: Synthesizes the narrative into a formal, company-specific application.
 
 The Interview Coach: Generates technical "grills" and behavioral prompts. New: Includes a "Professional Hint Layer" to train students in industry-standard communication.
-
+---
 🛠️ Tech Stack & Advanced Patterns
 Logic: Multi-agent Orchestration (Python/DeepSeek API).
 
@@ -31,8 +31,9 @@ Multimodal I/O: * Audio: Integrated gTTS (Text-to-Speech) for interviewer voice-
 Voice: Integrated streamlit-mic-recorder (Speech-to-Text) for live interview practice.
 
 Output: Automated .docx report generation via python-docx.
-
+---
 📈 Status: Phase 3 Complete (Production Ready)
+
 ✅ Phase 1: Core "Auditor" and "Storyteller" logic with JSON parsing.
 
 ✅ Phase 2: "Voice Filter" and "Fact-Checker" reflection loop.
