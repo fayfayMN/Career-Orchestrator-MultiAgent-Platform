@@ -2,63 +2,92 @@ import streamlit as st
 import sys
 import os
 
-# 1. FIX: Force Python to see the agents folder
+# 1. SYSTEM SETUP: Force Python to see the agents folder
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
 
-# 2. FIX: Unified Imports
+# 2. MODULAR IMPORTS
 try:
     from agents.auditor import perform_audit
     from agents.tutor import generate_syllabus
     from agents.storyteller import draft_star_bullets
+    from agents.voice_filter import refine_to_human_voice
 except ModuleNotFoundError as e:
-    st.error(f"Critical Error: Check folder name and __init__.py. {e}")
+    st.error(f"Critical Error: Check folder name (agents) and __init__.py location. {e}")
     st.stop()
 
 # --- STREAMLIT UI SETUP ---
-st.set_page_config(page_title="Career Orchestrator", page_icon="🤖")
-st.title("🚀 Career Orchestrator: DeepSeek Edition")
-st.markdown("Bridging the gap between your resume and the job market.")
+st.set_page_config(page_title="Career Orchestrator", page_icon="🤖", layout="wide")
+st.title("🚀 Career Orchestrator: Multi-Agent Platform")
+st.markdown("### Bridging the 'Entry-Level' Gap with Authenticity")
 
-# Sidebar for API Key
+# Sidebar for API Key & Settings
 with st.sidebar:
-    st.header("Settings")
+    st.header("🔑 Credentials")
     deepseek_api_key = st.text_input("DeepSeek API Key", type="password")
     st.info("Get your key at platform.deepseek.com")
+    st.divider()
+    st.write("Current Phase: **Phase 2 (Narrative Engine)**")
 
-# Input Section
+# --- INPUT SECTION ---
 col1, col2 = st.columns(2)
 with col1:
-    resume_text = st.text_area("Paste Master Resume:", height=300)
+    st.subheader("📄 Your Master Resume")
+    resume_text = st.text_area("Paste your background here:", height=300, 
+                               placeholder="Include your 3.9 GPA, USPS experience, etc.")
 with col2:
-    jd_text = st.text_area("Paste Job Description:", height=300)
+    st.subheader("💼 Target Job Description")
+    jd_text = st.text_area("Paste the job you want:", height=300,
+                           placeholder="Paste the full JD requirements here.")
 
-# ... (Keep your existing imports and setup) ...
-from agents.voice_filter import refine_to_human_voice # Ensure this import is added at the top
+# --- EXECUTION PIPELINE ---
+if st.button("Run Multi-Agent Optimization"):
+    if not deepseek_api_key:
+        st.error("Please enter your DeepSeek API Key in the sidebar.")
+    elif not resume_text or not jd_text:
+        st.warning("Please provide both a resume and a job description.")
+    else:
+        try:
+            # PHASE 1: THE AUDITOR (Gap Analysis)
+            with st.status("🛠️ Running Agentic Pipeline...", expanded=True) as status:
+                
+                st.write("Agent 1: The Auditor is identifying gaps...")
+                # Call Auditor with all 3 required arguments
+                gaps = perform_audit(resume_text, jd_text, deepseek_api_key)
+                st.subheader("🚩 The Gap Analysis")
+                st.markdown(gaps)
+                
+                # PHASE 1.5: THE TUTOR (Learning Plan)
+                st.write("Agent 2: The Tutor is generating your 48-hour syllabus...")
+                syllabus = generate_syllabus(gaps, deepseek_api_key)
+                st.subheader("📚 Rapid Upskilling Plan")
+                st.markdown(syllabus)
 
-# inside the 'if st.button("Analyze Gaps & Build Narrative"):' block:
+                # PHASE 2: THE STORYTELLER (Drafting)
+                st.write("Agent 3: The Storyteller is drafting STAR narratives...")
+                # Call Storyteller with all 4 required arguments
+                raw_stories = draft_star_bullets(resume_text, gaps, jd_text, deepseek_api_key)
+                
+                # PHASE 2.5: THE VOICE FILTER (Refining)
+                st.write("Agent 4: The Voice Filter is humanizing the tone...")
+                final_narrative = refine_to_human_voice(raw_stories, deepseek_api_key)
+                
+                status.update(label="✅ Optimization Complete!", state="complete", expanded=False)
+
+            # --- FINAL OUTPUT DISPLAY ---
+            st.divider()
+            st.header("🗣️ Your Authentically Revised Content")
+            st.success("This output uses your 'Voice of Resilience' to bridge identified gaps.")
+            st.info(final_narrative)
             
-            # --- PHASE 2: THE STORYTELLER (STAR Stories) ---
-            with st.divider():
-                with st.spinner("Agent 3 (The Storyteller) is drafting STAR narratives..."):
-                    raw_stories = draft_star_bullets(resume_text, gaps, jd_text, deepseek_api_key)
-                    st.subheader("📝 Initial AI Draft (STAR Method)")
-                    st.write(raw_stories)
-            
-            # --- PHASE 2.5: THE VOICE FILTER (Humanizing) ---
-            with st.divider():
-                with st.spinner("Agent 4 (The Voice Filter) is stripping AI-tone..."):
-                    # This agent uses your TRIO/Resilience style guide
-                    humanized_narrative = refine_to_human_voice(raw_stories, deepseek_api_key)
+            # Download feature for practicality
+            st.download_button(
+                label="Download Revised Content",
+                data=final_narrative,
+                file_name="resilience_narrative.txt",
+                mime="text/plain"
+            )
                     
-                    st.subheader("🗣️ Your Authentically Revised Resume Content")
-                    st.success("This version matches your blunt, practical, and resilient voice.")
-                    st.info(humanized_narrative)
-                    
-                    st.download_button(
-                        label="Download Revised Content",
-                        data=humanized_narrative,
-                        file_name="revised_resume_bullets.txt",
-                        mime="text/plain"
-                    )
+        except Exception as e:
+            st.error(f"Pipeline Error: {e}")
