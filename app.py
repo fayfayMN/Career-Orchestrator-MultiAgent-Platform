@@ -3,6 +3,7 @@ import sys
 import os
 from docx import Document
 from io import BytesIO
+from agents.fact_checker import run_fact_check
 
 # --- 1. SYSTEM SETUP ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -82,14 +83,19 @@ if st.button("Run Multi-Agent Optimization"):
                 # Agent 4: Voice Filter
                 st.write("Agent 4: Humanizing Tone...")
                 final_narrative = refine_to_human_voice(raw_stories, deepseek_api_key)
+                # Agent 5: fact-checker  ...
+                st.write("Agent 5: Running Fact-Check Verification...")
+                verification_report = run_fact_check(resume_input, final_narrative, deepseek_api_key)
                 
                 # SAVE TO PERSISTENT MEMORY
                 st.session_state.analysis_results = {
                     "gaps": gaps,
                     "syllabus": syllabus,
                     "narrative": final_narrative,
-                    "score": 82 # Dynamic score logic can go here
+                    "verification": verification_report, # New field
+                    "score": 82
                 }
+              
                 status.update(label="✅ All Agents Finished!", state="complete", expanded=False)
                 st.rerun() # Refresh to show results in the persistent layer
                     
@@ -106,7 +112,7 @@ if st.session_state.analysis_results:
     st.progress(res['score'] / 100)
 
     # Organized Tabs for clarity
-    t1, t2, t3 = st.tabs(["🚩 Gap Audit", "📚 Upskilling Plan", "🗣️ Final Narrative"])
+    t1, t2, t3, t4 = st.tabs(["🚩 Gap Audit", "📚 Syllabus", "🗣️ Final Narrative", "✅ Verification"])
     
     with t1:
         st.markdown(res['gaps'])
@@ -114,6 +120,12 @@ if st.session_state.analysis_results:
         st.markdown(res['syllabus'])
     with t3:
         st.info(res['narrative'])
+    with t4:
+        if "PASSED" in res['verification']:
+            st.success("Verification Status: All facts aligned with Master Resume.")
+        else:
+            st.warning("Verification Warning: Please check the following discrepancies:")
+            st.write(res['verification'])
         
         # DOWNLOAD ALL DATA AT ONCE
         full_report = create_full_report(res)
