@@ -1,36 +1,35 @@
-# agents/auditor.py
+# agents/tutor.py
 from openai import OpenAI
 
-def perform_audit(resume_text, job_description, api_key):
+def generate_syllabus(gap_list, api_key):
     """
-    Agent 1: The Auditor. 
-    Compares Resume vs. JD to find the 'Blunt Truth' about skill gaps.
+    Agent 2: The Tutor.
+    For every missing skill, it generates a 'How to Learn This Fast' guide.
     """
-    # Configure for DeepSeek OpenAI-compatible API
     client = OpenAI(
         api_key=api_key, 
         base_url="https://api.deepseek.com"
     )
 
     prompt = f"""
-    ROLE: High-Precision Technical Recruiter and Gap Analyst.
-    TASK: Perform a 'Deep Audit' of this Resume against the Job Description.
+    ROLE: Senior Data Science Mentor.
+    INPUT: A list of technical skill gaps identified in a job audit: {gap_list}
     
-    RESUME: {resume_text}
-    JOB DESCRIPTION: {job_description}
-
-    OUTPUT REQUIREMENTS:
-    1. MATCHES: List technical skills the user clearly possesses.
-    2. GAPS: List mandatory tools or skills mentioned in the JD that are NOT on the resume. 
-    3. THE BLUNT TRUTH: Provide a 'Match Percentage'. If it is below 80%, identify the top 2 'Blind Spots'.
+    TASK:
+    For each gap, create a '48-Hour Learning Syllabus' that includes:
+    1. THE FUNDAMENTAL: The one core concept to master first.
+    2. THE RESOURCE: Suggest the best documentation (e.g., 'Official Snowflake Docs') or a specific YouTube search term.
+    3. THE MINI-PROJECT: A 2-hour coding task to prove basic proficiency (e.g., 'Build a simple ETL pipeline').
     
-    TONE: Blunt and factual. No fluff. Do not fake the skill.
+    GOAL: Enable the user to honestly say: 'I saw you use X; I spent the last 48 hours building a replica pipeline to understand the logic.'
+    
+    TONE: Encouraging, practical, and time-sensitive.
     """
 
     response = client.chat.completions.create(
         model="deepseek-chat",
         messages=[
-            {"role": "system", "content": "You are a blunt Technical Auditor. You identify gaps with 100% honesty."},
+            {"role": "system", "content": "You are a Mentor who bridges the gap between 'I don't know it' and 'I am learning it'."},
             {"role": "user", "content": prompt}
         ]
     )
