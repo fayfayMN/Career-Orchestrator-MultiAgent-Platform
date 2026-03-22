@@ -4,7 +4,13 @@ import os
 from docx import Document
 from io import BytesIO
 from streamlit_mic_recorder import mic_recorder
+from gtts import gTTS
 
+def speak_text(text):
+    tts = gTTS(text=text, lang='en')
+    with BytesIO() as f:
+        tts.write_to_fp(f)
+        st.audio(f, format="audio/mp3")
 
 # --- 1. SETUP ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
