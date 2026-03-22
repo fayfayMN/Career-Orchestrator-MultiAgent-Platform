@@ -34,34 +34,31 @@ with col1:
 with col2:
     jd_text = st.text_area("Paste Job Description:", height=300)
 
-# --- EXECUTION LOGIC ---
-if st.button("Analyze Gaps & Build Narrative"):
-    if not deepseek_api_key:
-        st.error("Please enter your DeepSeek API Key in the sidebar.")
-    elif not resume_text or not jd_text:
-        st.warning("Please provide both a resume and a job description.")
-    else:
-        try:
-            # --- PHASE 1: THE AUDITOR (Gap Analysis) ---
-            with st.spinner("Agent 1 (The Auditor) is identifying gaps..."):
-                # FIXED: Added the required api_key argument
-                gaps = perform_audit(resume_text, jd_text, deepseek_api_key)
-                st.subheader("🚩 The Gap Analysis")
-                st.write(gaps)
-            
-            # --- PHASE 1.5: THE TUTOR (Learning Syllabus) ---
-            with st.divider():
-                with st.spinner("Agent 2 (The Tutor) is creating your syllabus..."):
-                    syllabus = generate_syllabus(gaps, deepseek_api_key)
-                    st.subheader("📚 48-Hour Rapid Upskilling Plan")
-                    st.write(syllabus)
+# ... (Keep your existing imports and setup) ...
+from agents.voice_filter import refine_to_human_voice # Ensure this import is added at the top
 
+# inside the 'if st.button("Analyze Gaps & Build Narrative"):' block:
+            
             # --- PHASE 2: THE STORYTELLER (STAR Stories) ---
             with st.divider():
                 with st.spinner("Agent 3 (The Storyteller) is drafting STAR narratives..."):
-                    star_stories = draft_star_bullets(resume_text, gaps, jd_text, deepseek_api_key)
-                    st.subheader("✍️ Your Resilience-Based STAR Stories")
-                    st.info(star_stories)
+                    raw_stories = draft_star_bullets(resume_text, gaps, jd_text, deepseek_api_key)
+                    st.subheader("📝 Initial AI Draft (STAR Method)")
+                    st.write(raw_stories)
+            
+            # --- PHASE 2.5: THE VOICE FILTER (Humanizing) ---
+            with st.divider():
+                with st.spinner("Agent 4 (The Voice Filter) is stripping AI-tone..."):
+                    # This agent uses your TRIO/Resilience style guide
+                    humanized_narrative = refine_to_human_voice(raw_stories, deepseek_api_key)
                     
-        except Exception as e:
-            st.error(f"An error occurred during agent execution: {e}")
+                    st.subheader("🗣️ Your Authentically Revised Resume Content")
+                    st.success("This version matches your blunt, practical, and resilient voice.")
+                    st.info(humanized_narrative)
+                    
+                    st.download_button(
+                        label="Download Revised Content",
+                        data=humanized_narrative,
+                        file_name="revised_resume_bullets.txt",
+                        mime="text/plain"
+                    )
