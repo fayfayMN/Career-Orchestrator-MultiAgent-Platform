@@ -1,11 +1,9 @@
 # agents/auditor.py
 from openai import OpenAI
+import json
+import re
 
 def perform_audit(resume_text, job_description, api_key):
-    """
-    Agent 1: The Auditor. 
-    Compares Resume vs. JD to find the 'Blunt Truth' about skill gaps.
-    """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
     prompt = f"""
@@ -15,20 +13,24 @@ def perform_audit(resume_text, job_description, api_key):
     RESUME: {resume_text}
     JOB DESCRIPTION: {job_description}
 
-    OUTPUT REQUIREMENTS:
-    1. MATCHES: List technical skills the user clearly possesses.
-    2. GAPS: List mandatory tools or skills mentioned in the JD that are NOT on the resume.
-    3. THE BLUNT TRUTH: Provide a 'Match Percentage'. If it is below 80%, identify the top 2 'Blind Spots'.
-    
-    TONE: Blunt and factual. No fluff. 
+    OUTPUT FORMAT (STRICT):
+    Return ONLY a JSON object with these keys:
+    - "score": (An integer from 0-100 representing the match percentage)
+    - "matches": (A list of skills found)
+    - "gaps": (A list of missing mandatory skills)
+    - "summary": (A 2-sentence 'Blunt Truth' assessment)
+
+    TONE: Blunt and factual.
     """
 
     response = client.chat.completions.create(
         model="deepseek-chat",
         messages=[
-            {"role": "system", "content": "You are a blunt Technical Auditor. You identify gaps with 100% honesty."},
+            {"role": "system", "content": "You are a technical data auditor. Return only raw JSON."},
             {"role": "user", "content": prompt}
-        ]
+        ],
+        response_format={'type': 'json_object'} # Forces DeepSeek to output valid JSON
     )
     
-    return response.choices[0].message.content
+    # Parse the JSON string into a Python Dictionary
+    return json.loads(response.choices[0].message.content)
