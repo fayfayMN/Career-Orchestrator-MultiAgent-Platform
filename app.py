@@ -3,6 +3,8 @@ import sys
 import os
 from docx import Document
 from io import BytesIO
+from streamlit_mic_recorder import mic_recorder
+
 
 # --- 1. SETUP ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -64,8 +66,29 @@ if st.session_state.analysis_results:
         st.subheader("👨‍💼 Mock Interview")
         st.markdown(res['questions'])
         st.divider()
-        ans = st.text_area("Type your STAR answer here:")
+        
+        st.write("### 🎙️ Record Your Answer")
+        # This component handles the microphone and returns text via Whisper
+        audio_prompt = mic_recorder(
+            start_prompt="Start Recording 🎤",
+            stop_prompt="Stop & Convert to Text ⏹️",
+            key='recorder'
+        )
+
+        # Logic to handle the audio result
+        if audio_prompt:
+            st.session_state.voice_text = audio_prompt['text']
+            st.success("Voice converted successfully!")
+
+        # Show the converted text in the box so you can edit it if needed
+        ans = st.text_area("Your STAR Answer (Voice or Type):", 
+                           value=st.session_state.get('voice_text', ""))
+
         if st.button("Submit for Grading"):
-            feedback = evaluate_answer(res['questions'], ans, deepseek_api_key)
-            st.markdown("### 📊 Evaluator Feedback")
-            st.success(feedback)
+            if ans:
+                with st.spinner("Agent 7 is evaluating your response..."):
+                    feedback = evaluate_answer(res['questions'], ans, deepseek_api_key)
+                    st.markdown("### 📊 Evaluator Feedback")
+                    st.success(feedback)
+            else:
+                st.warning("Please record or type an answer first.")
