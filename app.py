@@ -3,6 +3,7 @@ import sys
 import os
 from docx import Document
 from io import BytesIO
+from agents.interviewer import generate_interview_questions
 
 # --- 1. SYSTEM SETUP ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -93,6 +94,13 @@ if st.button("Run Multi-Agent Optimization"):
                 st.write("Agent 5: Running Integrity Check...")
                 verification = run_fact_check(resume_input, final_narrative, deepseek_api_key)
                 
+                # Agent 6:Mock Interview Questions
+                st.write("Agent 6: Generating Mock Interview Questions...")
+                questions = generate_interview_questions(resume_input, gaps, deepseek_api_key)
+                
+                # SAVE TO MEMORY
+                st.session_state.analysis_results["questions"] = questions
+                
                 # SAVE TO PERSISTENT MEMORY
                 st.session_state.analysis_results = {
                     "gaps": gaps,
@@ -116,7 +124,7 @@ if st.session_state.analysis_results:
     st.progress(res['score'] / 100)
 
     # Organized Tabs
-    t1, t2, t3, t4 = st.tabs(["🚩 Gap Audit", "📚 Syllabus", "🗣️ Final Narrative", "✅ Integrity Check"])
+    t1, t2, t3, t4, t5 = st.tabs(["🚩 Gap Audit", "📚 Syllabus", "🗣️ Narrative", "✅ Integrity", "🎤 Interview Prep"])
     
     with t1:
         st.markdown(res['gaps'])
@@ -130,6 +138,17 @@ if st.session_state.analysis_results:
         else:
             st.warning("Integrity Warning: Discrepancies found.")
             st.write(res['verification'])
+
+    with t5:
+        st.subheader("👨‍💼 Mock Interviewer: Your Practice Questions")
+        st.warning("Answer these out loud or draft them using the STAR method.")
+        st.markdown(res['questions'])
+        
+        # Next Step logic
+        user_answer = st.text_area("Draft your answer here for feedback:", height=150)
+        if st.button("Get Feedback on Answer"):
+            st.info("Coming soon: Agent 7 (The Evaluator) will grade your response!")
+            
         
         # DOWNLOAD FULL PROCESS
         full_report = create_full_report(res)
