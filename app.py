@@ -1,11 +1,21 @@
+import streamlit as st
 import sys
 import os
 
-# Adds the current directory to the Python path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# 1. FORCE PYTHON TO SEE THE AGENTS FOLDER
+# This gets the absolute path of the directory where app.py lives
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.append(current_dir)
 
-# Now try the import again
-from agents.auditor import perform_audit
+# 2. NOW ATTEMPT THE IMPORTS
+try:
+    from agents.auditor import perform_audit
+    from agents.tutor import generate_syllabus
+    from agents.storyteller import draft_star_bullets
+except ModuleNotFoundError as e:
+    st.error(f"Critical Error: Could not find the Agents folder. {e}")
+    st.stop()
 
 import streamlit as st
 from langchain_openai import ChatOpenAI
