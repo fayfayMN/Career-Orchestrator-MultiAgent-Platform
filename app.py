@@ -1,3 +1,17 @@
+from docx import Document
+from io import BytesIO
+
+def create_docx(text):
+    doc = Document()
+    doc.add_heading('Revised Resume Content', 0)
+    doc.add_paragraph(text)
+    
+    # Save to a buffer so Streamlit can download it
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+    
 import streamlit as st
 import sys
 import os
