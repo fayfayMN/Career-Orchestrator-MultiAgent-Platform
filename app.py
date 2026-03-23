@@ -1,4 +1,23 @@
 import streamlit as st
+
+# --- PAGE CONFIG ---
+st.set_page_config(page_title="Career Orchestrator", page_icon="🚀")
+
+# --- MAIN HEADER ---
+st.title("🚀 Career Orchestrator")
+
+st.markdown("""
+    ### Stop wasting time and energy on the 'Apply and Pray' cycle.
+    This system acts as your personal **Strategy Engine**:
+    * **Audit:** Instantly identifies if a job is worth your time.
+    * **Persona:** Builds an authentic resume and cover letter that sounds like *you*.
+    * **Bridge:** Provides a 48-hour 'cheat sheet' for any skill gaps.
+    * **Coach:** Grills you on the tough interview questions.
+""")
+
+st.divider() # Adds a clean line to separate the intro from the tools
+
+import streamlit as st
 import sys
 import os
 import json # Essential for parsing the AI's real score
