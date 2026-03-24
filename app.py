@@ -25,6 +25,7 @@ import sys
 import os
 from io import BytesIO
 from gtts import gTTS
+from agents.voice_filter import refine_to_human_voice, judge_persona_fit
 
 # --- 1. SETUP & PATHS ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -78,7 +79,9 @@ with st.sidebar:
     st.divider()
     
     st.header("👤 Persona Designer")
-    user_traits = st.text_input("Top 3 Traits/Strengths:", placeholder="e.g., Relentless, Systematic, Empathetic")
+    traits = st.text_input("Your Core Strengths:")
+    weakness = st.text_input("A 'Growth Area':")
+    p_style = st.selectbox("Style:", ["Direct", "Empathetic", "Technical"])
     user_writing_sample = st.text_area("Writing DNA (Paste a bio or intro):", placeholder="Helps the AI match your unique voice...")
     
     if st.button("🗑️ Reset Session"):
