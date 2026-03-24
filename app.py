@@ -1,3 +1,25 @@
+def generate_docx(res):
+    doc = Document()
+    doc.add_heading('Career Orchestrator: Professional Analysis', 0)
+    
+    doc.add_heading('1. Match Audit & Gaps', level=1)
+    doc.add_paragraph(f"Match Score: {res['score']}%")
+    doc.add_paragraph(res['summary'])
+    doc.add_paragraph(str(res['gaps']))
+
+    doc.add_heading('2. Tailored Cover Letter', level=1)
+    doc.add_paragraph(res['cover_letter'])
+
+    doc.add_heading('3. Authentic STAR Bullets', level=1)
+    doc.add_paragraph(res['narrative'])
+
+    doc.add_heading('4. 48-Hour Learning Syllabus', level=1)
+    doc.add_paragraph(res['syllabus'])
+
+    # Save to a byte buffer so Streamlit can download it
+    bio = BytesIO()
+    doc.save(bio)
+    return bio.getvalue()
 import streamlit as st
 import sys
 import os
