@@ -145,7 +145,24 @@ if st.session_state.analysis_results:
                     })
                     st.toast("Bridge Confirmed: Orchestration Complete!", icon="✅")
                     st.rerun()
-
+        # app.py - After the 60% Match Check
+        if res['score'] >= 60:
+            with st.expander("👤 Step 1.5: Define Your Professional Persona", expanded=True):
+                st.markdown("### Who are you beyond the resume?")
+                col_p1, col_p2 = st.columns(2)
+                with col_p1:
+                    traits = st.text_input("Your Core Strengths:", placeholder="e.g., Relentless, Data-Driven")
+                    weakness = st.text_input("A 'Growth Area' or Blind Spot:", placeholder="e.g., Perfectionism, Over-delivering")
+                with col_p2:
+                    p_style = st.selectbox("Your Communication Style:", ["Blunt & Direct", "Empathetic & Story-based", "Technical & Precise"])
+                
+                # THE JUDGMENT BUTTON
+                if st.button("⚖️ Analyze My Fit"):
+                    with st.spinner("Comparing your personality to the job's culture..."):
+                        # Call a new function to judge the "Fit"
+                        fit_report = judge_persona_fit(traits, weakness, p_style, jd_input, api_key)
+                        st.session_state.analysis_results['persona_fit'] = fit_report
+                        st.info(f"**Persona Alignment:** {fit_report}")
         # --- 7. TABBED OUTPUTS ---
         if "cover_letter" in res:
             tabs = st.tabs(["🚩 Audit Gaps", "📄 Cover Letter", "🗣️ STAR Bullets", "📚 Syllabus", "✅ Integrity Check", "🎤 Interview Coach"])
