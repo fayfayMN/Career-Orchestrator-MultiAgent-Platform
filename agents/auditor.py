@@ -1,36 +1,40 @@
 # agents/auditor.py
 from openai import OpenAI
 import json
-import re
 
 def perform_audit(resume_text, job_description, api_key):
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
     prompt = f"""
-    ROLE: High-Precision Technical Recruiter.
-    TASK: Perform a 'Deep Audit' of this Resume against the Job Description.
+    ROLE: Strategic Talent Architect.
+    TASK: Perform a 'Potential Mapping' Audit of this Resume against the Job Description.
     
     RESUME: {resume_text}
     JOB DESCRIPTION: {job_description}
 
-    OUTPUT FORMAT (STRICT):
-    Return ONLY a JSON object with these keys:
-    - "score": (An integer from 0-100 representing the match percentage)
-    - "matches": (A list of skills found)
-    - "gaps": (A list of missing mandatory skills)
-    - "summary": (A 2-sentence 'Blunt Truth' assessment)
+    AUDIT PARAMETERS:
+    1. CATEGORY DETECTION: If the JD is for an 'Internship' or 'Junior' role, do NOT penalize for overqualification.
+    2. SKILL SUPERSETS: Recognize that advanced DS/ML skills (Python, Modeling) inherently satisfy basic 'Data Analysis/Excel' requirements.
+    3. TRANSFERABLE GRIT: Value high-stakes communication (Interpreting) and operational logistics (USPS) as evidence of 'Professional Readiness.'
+    4. MATCH SCORE: Base the score on 'Capability to execute' rather than 'Identical job titles.'
 
-    TONE: Blunt and factual.
+    OUTPUT FORMAT (STRICT):
+    Return ONLY a JSON object:
+    - "score": (Integer 0-100)
+    - "matches": (List of skills found)
+    - "gaps": (List of missing items - focus ONLY on what prevents them from doing the job)
+    - "summary": (A 2-sentence 'Blunt Truth' focusing on how to pivot their high-level skills for this specific role)
+
+    TONE: Practical, encouraging but realistic.
     """
 
     response = client.chat.completions.create(
         model="deepseek-chat",
         messages=[
-            {"role": "system", "content": "You are a technical data auditor. Return only raw JSON."},
+            {"role": "system", "content": "You are a strategic career auditor. Return only raw JSON."},
             {"role": "user", "content": prompt}
         ],
-        response_format={'type': 'json_object'} # Forces DeepSeek to output valid JSON
+        response_format={'type': 'json_object'} 
     )
     
-    # Parse the JSON string into a Python Dictionary
     return json.loads(response.choices[0].message.content)
