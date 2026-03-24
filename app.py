@@ -138,4 +138,8 @@ if st.session_state.analysis_results:
                 st.markdown(res['questions'])
                 ans = st.text_area("Draft your response here:")
                 if st.button("Grade Response"):
-                    st.success(evaluate_answer(res['questions'], ans, api_key)))
+                    
+                # Step 1: Get the grade first
+                    grade_result = evaluate_answer(res['questions'], ans, api_key)
+                # Step 2: Display it
+                    st.success(grade_result)
