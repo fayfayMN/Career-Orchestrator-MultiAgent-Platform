@@ -20,7 +20,7 @@ try:
     from agents.interviewer import generate_interview_questions, evaluate_answer
     from agents.cover_letter import generate_cover_letter
 except ImportError as e:
-    st.error(f"Critical Sync Error: {e}. Ensure all agent functions match the required arguments.")
+    st.error(f"Sync Error: {e}. Check agent function arguments.")
     st.stop()
 
 # --- 3. HELPER FUNCTIONS ---
@@ -35,8 +35,14 @@ def speak_text(text):
 
 def generate_docx(res):
     doc = Document()
-    doc.add_heading('Career Orchestrator: Professional Analysis', 0)
-    for title, key in [('Audit Summary', 'summary'), ('Cover Letter', 'cover_letter'), ('STAR Narrative', 'narrative'), ('Learning Syllabus', 'syllabus')]:
+    doc.add_heading('Career Orchestrator: Professional Report', 0)
+    sections = [
+        ('Audit Summary', 'summary'),
+        ('ATS Resume Bullets', 'resume_bullets'),
+        ('Human Cover Letter', 'cover_letter'),
+        ('Learning Syllabus', 'syllabus')
+    ]
+    for title, key in sections:
         doc.add_heading(title, level=1)
         doc.add_paragraph(str(res.get(key, "N/A")))
     bio = BytesIO()
@@ -49,13 +55,10 @@ st.set_page_config(page_title="Career Orchestrator", layout="wide", page_icon="�
 if 'analysis_results' not in st.session_state:
     st.session_state.analysis_results = None
 
-# --- SIDEBAR: MISSION CONTROL ---
+# --- SIDEBAR ---
 with st.sidebar:
     st.title("🚀 Career Orchestrator")
-    st.markdown("**Version 2.0: Seniority-Aware Pipeline**")
     st.divider()
-    
-    st.header("🔑 Credentials")
     api_key = st.text_input("DeepSeek API Key", type="password")
     
     st.divider()
@@ -63,14 +66,14 @@ with st.sidebar:
     job_level = st.selectbox(
         "Target Job Level:",
         ["Entry/Internship", "Associate/Professional", "Senior/Specialist"],
-        help="This tunes the Storyteller and Voice Filter to the appropriate seniority."
+        help="Tunes agents for seniority-appropriate language."
     )
     
     if st.button("🗑️ Reset Session"):
         st.session_state.analysis_results = None
         st.rerun()
 
-# --- 5. MAIN INTERFACE: DATA INGESTION ---
+# --- 5. MAIN INTERFACE ---
 st.header("🎯 Dynamic Match Engine")
 col1, col2 = st.columns(2)
 with col1:
@@ -78,113 +81,83 @@ with col1:
 with col2:
     jd_input = st.text_area("Paste Job Description:", height=200)
 
-# STEP 1: THE AUDIT (GATEKEEPER)
+# STEP 1: AUDIT
 if st.button("🔍 Step 1: Analyze Match Rate"):
     if not api_key or not resume_input or not jd_input:
-        st.warning("Please provide API Key, Resume, and Job Description.")
+        st.warning("Please provide all inputs.")
     else:
-        with st.status("🧐 Running Potential-Mapping Audit...", expanded=True):
+        with st.status("🧐 Running Potential-Mapping Audit..."):
             audit_data = perform_audit(resume_input, jd_input, api_key)
             st.session_state.analysis_results = audit_data
             st.rerun()
 
-# --- 6. THE ORCHESTRATION PIPELINE ---
+# --- 6. CONDITIONAL RESULTS & ORCHESTRATION ---
 if st.session_state.analysis_results:
     res = st.session_state.analysis_results
     st.divider()
-    
-    # Header Metrics
-    m_col, t_col = st.columns([1, 4])
-    m_col.metric("Match Score", f"{res['score']}%")
-    t_col.info(f"**The Blunt Truth:** {res.get('summary')}")
+    st.metric("Match Score", f"{res['score']}%")
+    st.info(f"**The Blunt Truth:** {res.get('summary')}")
 
-    # Logic Branch: Only proceed if score is viable
-    if res['score'] < 50:
-        st.error("⚠️ Match rate too low. Bridge these gaps before proceeding:")
-        st.write(res['gaps'])
-    else:
-        # STEP 1.5: PERSONA DESIGNER (CONSULTATION)
+    if res['score'] >= 50:
+        # STEP 1.5: PERSONA DESIGNER
         with st.expander("👤 Step 1.5: Define Your Professional Persona", expanded=True):
-            st.markdown("### Human-Job Alignment")
             c1, c2 = st.columns(2)
             with c1:
-                traits = st.text_input("Top Strengths:", placeholder="e.g., Data-Driven, Resilient")
+                traits = st.text_input("Strengths:", placeholder="e.g., Data-Driven, Resilient")
                 weakness = st.text_input("Growth Area:", placeholder="e.g., Perfectionism")
             with c2:
-                p_style = st.selectbox("Style:", ["Blunt & Direct", "Empathetic", "Technical"])
-                writing_dna = st.text_area("Writing Sample:", placeholder="Paste a short bio to match your voice...")
+                p_style = st.selectbox("Style:", ["Blunt", "Empathetic", "Technical"])
+                writing_dna = st.text_area("Writing DNA:", placeholder="Paste a short bio...")
 
             if st.button("⚖️ Analyze My Fit"):
-                with st.spinner("Judging culture fit..."):
-                    fit = judge_persona_fit(traits, weakness, p_style, jd_input, api_key)
-                    st.session_state.analysis_results['persona_fit'] = fit
-                    st.info(f"**Persona Judgment:** {fit}")
+                fit = judge_persona_fit(traits, weakness, p_style, jd_input, api_key)
+                st.session_state.analysis_results['persona_fit'] = fit
+                st.info(f"**Persona Alignment:** {fit}")
 
-        # STEP 2: FULL PACKAGE GENERATION
+        # --- STEP 2: FULL ORCHESTRATION ---
         if "cover_letter" not in res:
             if st.button("🚀 Step 2: Generate Full Package"):
                 with st.status("🛠️ Running 7-Agent Pipeline...", expanded=True):
-                    gaps_text = str(res['gaps'])
+                    gaps_text = str(res.get('gaps', 'None'))
                     
-                    # 1. Syllabus
-                    
+                    # 1. Syllabus (Syllabus now takes 3 args)
                     syllabus = generate_syllabus(gaps_text, job_level, api_key)
                     
-                    # 2. THE STORYTELLER (This is for your RESUME bullets)
-                    # This stays professional and third-person.
-                    resume_bullets = draft_star_bullets(
-                        resume_text=resume_input, 
-                        gaps=gaps_text, 
-                        jd=jd_input, 
-                        job_level=job_level, 
-                        api_key=api_key
-                    )
+                    # 2. ATS Resume Bullets (Storyteller)
+                    r_bullets = draft_star_bullets(resume_input, gaps_text, jd_input, job_level, api_key)
                     
-                    # 3. THE VOICE FILTER (This is ONLY for your COVER LETTER)
-                    # This takes the facts and makes them sound like "Feifei Li" speaking.
-                    cover_letter_narrative = refine_to_human_voice(
-                        draft_text=resume_bullets, 
-                        traits=traits, 
-                        user_writing_sample=writing_dna, 
-                        job_level=job_level, 
-                        api_key=api_key
-                    )
-                    # 4. Verification & Support Agents
-                    verify = run_fact_check(resume_input, narrative, api_key)
+                    # 3. Human Narrative (Voice Filter)
+                    h_narrative = refine_to_human_voice(r_bullets, traits, writing_dna, job_level, api_key)
+                    
+                    # 4. Downstream Agents
+                    verify = run_fact_check(resume_input, h_narrative, api_key)
                     questions = generate_interview_questions(resume_input, gaps_text, api_key)
-                    cover = generate_cover_letter(resume_input, jd_input, narrative, api_key)
+                    cover = generate_cover_letter(resume_input, jd_input, h_narrative, api_key)
                     
                     # 5. Commit to State
                     st.session_state.analysis_results.update({
                         "syllabus": syllabus, 
-                        "narrative": narrative,
+                        "resume_bullets": r_bullets,
+                        "narrative": h_narrative,
                         "verification": verify, 
                         "questions": questions, 
                         "cover_letter": cover
                     })
                     st.rerun()
 
-        # --- 7. TABBED OUTPUTS ---
+        # --- 7. TABS DISPLAY ---
         if "cover_letter" in res:
-            tabs = st.tabs(["🚩 Audit", "📄 Cover Letter", "🗣️ STAR Bullets", "📚 Syllabus", "✅ Integrity", "🎤 Interview"])
-            with tabs[0]: st.write(res['gaps'])
-            with tabs[1]: st.write(res['cover_letter'])
-            with tabs[2]: st.info(res['narrative'])
-            with tabs[3]: st.markdown(res['syllabus'])
-            with tabs[4]: st.write(res['verification'])
-            with tabs[5]:
-                st.subheader("👨‍💼 Interview Simulation")
-                if st.button("🔊 Play Questions"): speak_text(res['questions'])
-                st.markdown(res['questions'])
-                ans = st.text_area("Draft your response here:")
+            t = st.tabs(["🚩 Audit", "📄 Cover Letter", "📊 ATS Bullets", "📚 Syllabus", "✅ Integrity", "🎤 Interview"])
+            with t[0]: st.write(res.get('gaps'))
+            with t[1]: st.write(res.get('cover_letter'))
+            with t[2]: st.code(res.get('resume_bullets'), language="markdown")
+            with t[3]: st.markdown(res.get('syllabus'))
+            with t[4]: st.write(res.get('verification'))
+            with t[5]:
+                st.markdown(res.get('questions'))
+                ans = st.text_area("Draft your answer:")
                 if st.button("Grade Response"):
-                    st.success(evaluate_answer(res['questions'], ans, api_key))
+                    st.success(evaluate_answer(res.get('questions'), ans, api_key))
             
             st.divider()
-            doc_bytes = generate_docx(res)
-            st.download_button(
-                label="📥 Download Full Career Package (.docx)",
-                data=doc_bytes,
-                file_name="Career_Orchestrator_Report.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
+            st.download_button("📥 Download Report (.docx)", generate_docx(res), "Career_Report.docx")
