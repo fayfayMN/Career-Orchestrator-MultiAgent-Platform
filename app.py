@@ -127,7 +127,8 @@ if st.session_state.analysis_results:
                     gaps_text = str(res['gaps'])
                     
                     # 1. Syllabus
-                    syllabus = generate_syllabus(gaps_text, api_key)
+                    
+                    syllabus = generate_syllabus(gaps_text, job_level, api_key)
                     
                     # 2. Storyteller (Internship-Aware)
                     raw_stories = draft_star_bullets(
