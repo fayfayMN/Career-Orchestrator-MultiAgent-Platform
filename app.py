@@ -153,11 +153,26 @@ if st.session_state.analysis_results:
             with t[2]: st.code(res.get('resume_bullets'), language="markdown")
             with t[3]: st.markdown(res.get('syllabus'))
             with t[4]: st.write(res.get('verification'))
-            with t[5]:
-                st.markdown(res.get('questions'))
-                ans = st.text_area("Draft your answer:")
-                if st.button("Grade Response"):
-                    st.success(evaluate_answer(res.get('questions'), ans, api_key))
+            with t[5]: # The Interview Tab
+                st.subheader("🎤 AI Interview Coach")
+                
+                # Retrieve the questions from session state
+                questions = res.get('questions', "No questions generated yet.")
+                
+                # THE FIX: Add the "Play" button back
+                col_text, col_audio = st.columns([3, 1])
+                with col_text:
+                    st.write(questions)
+                with col_audio:
+                    if st.button("🔊 Read Aloud"):
+                        speak_text(questions) # This calls your gTTS helper function
+
+                st.divider()
+                ans = st.text_area("Draft your response (Voice your 'Hungry Automator' persona):")
+                if st.button("Grade My Answer"):
+                    with st.spinner("Analyzing alignment..."):
+                        feedback = evaluate_answer(questions, ans, api_key)
+                        st.success(feedback)
             
             st.divider()
             st.download_button("📥 Download Report (.docx)", generate_docx(res), "Career_Report.docx")
