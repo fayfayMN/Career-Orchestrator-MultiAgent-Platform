@@ -143,14 +143,15 @@ if st.session_state.analysis_results:
                     
                     # Incorporate Job Level into the Voice Filter
                    
+                  # Step 2: Running the Voice Filter
                     narrative = refine_to_human_voice(
                         draft_text=stories, 
                         traits=traits, 
                         user_writing_sample=writing_dna, 
-                        job_level=job_level, # THIS IS THE NEW CRITICAL VARIABLE
+                        job_level=job_level,  # <-- THIS IS LIKELY THE MISSING LINE
                         api_key=api_key
                     )
-                    
+                                        
                     verify = run_fact_check(resume_input, narrative, api_key)
                     qs = generate_interview_questions(resume_input, gaps, api_key)
                     cover = generate_cover_letter(resume_input, jd_input, narrative, api_key)
