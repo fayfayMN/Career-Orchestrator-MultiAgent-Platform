@@ -47,11 +47,11 @@ def refine_to_human_voice(draft_text, traits, user_writing_sample, job_level, ap
     else: # Associate/Professional
         strategy = """
         TONE: The 'Problem Solver.' 
-        Focus on: Independent project delivery, specific technical mastery (SQL/Python), and accuracy.
+        Focus on: Independent project delivery, mastery of tools, and accuracy.
         """
 
     style_guide = f"""
-    ACT AS: A career coach refining a candidate's voice.
+    ACT AS: A career coach refining a candidate's voice for a {job_level} role.
     STRATEGY: {strategy}
     USER TRAITS: {traits}
     WRITING DNA: {user_writing_sample}
@@ -62,7 +62,7 @@ def refine_to_human_voice(draft_text, traits, user_writing_sample, job_level, ap
     3. AUTHENTICITY: Weave in their 'Writing DNA' to keep the tone human.
     """
 
-    prompt = f"{style_guide}\n\nTASK: Rewrite these STAR bullets for a {job_level} role:\n{draft_text}"
+    prompt = f"{style_guide}\n\nTASK: Rewrite these STAR bullets:\n{draft_text}"
 
     response = client.chat.completions.create(
         model="deepseek-chat",
