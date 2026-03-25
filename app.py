@@ -130,8 +130,9 @@ if st.session_state.analysis_results:
                     
                     syllabus = generate_syllabus(gaps_text, job_level, api_key)
                     
-                    # 2. Storyteller (Internship-Aware)
-                    raw_stories = draft_star_bullets(
+                    # 2. THE STORYTELLER (This is for your RESUME bullets)
+                    # This stays professional and third-person.
+                    resume_bullets = draft_star_bullets(
                         resume_text=resume_input, 
                         gaps=gaps_text, 
                         jd=jd_input, 
@@ -139,15 +140,15 @@ if st.session_state.analysis_results:
                         api_key=api_key
                     )
                     
-                    # 3. Voice Filter (Seniority-Aware)
-                    narrative = refine_to_human_voice(
-                        draft_text=raw_stories, 
+                    # 3. THE VOICE FILTER (This is ONLY for your COVER LETTER)
+                    # This takes the facts and makes them sound like "Feifei Li" speaking.
+                    cover_letter_narrative = refine_to_human_voice(
+                        draft_text=resume_bullets, 
                         traits=traits, 
                         user_writing_sample=writing_dna, 
                         job_level=job_level, 
                         api_key=api_key
                     )
-                    
                     # 4. Verification & Support Agents
                     verify = run_fact_check(resume_input, narrative, api_key)
                     questions = generate_interview_questions(resume_input, gaps_text, api_key)
