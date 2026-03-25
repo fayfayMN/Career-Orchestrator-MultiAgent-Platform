@@ -2,52 +2,38 @@ from openai import OpenAI
 
 def draft_star_bullets(resume_text, gaps, jd, job_level, api_key):
     """
-    Agent 3: The Storyteller
-    Generates raw STAR bullets tailored to the target seniority level.
+    Agent 3: The Storyteller (Problem-Solver Edition)
+    Converts resume facts into high-stakes STAR stories.
     """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
-    # SENIORITY-BASED ANGLE
+    # SENIORITY-BASED STRATEGY
     if job_level == "Entry/Internship":
-        focus_prompt = """
-        FOCUS: Operational Utility & Technical Support.
-        Highlight: Accuracy, ability to follow complex documentation, Excel/Python automation for 'messy' data, 
-        and high-speed task completion (USPS background). 
-        Avoid: High-level strategy or 'leading' teams.
-        """
+        focus = "Reliability, Accuracy, and Speed. Focus on fixing messy data and following processes."
     elif job_level == "Senior/Specialist":
-        focus_prompt = """
-        FOCUS: Architecture & Institutional Impact.
-        Highlight: End-to-end pipeline design, ROI, leading technical initiatives, 
-        and solving systemic business problems with AI.
-        """
+        focus = "ROI, Architecture, and scaling systems to solve million-dollar problems."
     else:
-        focus_prompt = """
-        FOCUS: Independent Problem Solving.
-        Highlight: Specific project delivery, tool mastery (SQL/Deep Learning), 
-        and bridging the gap between data and insights.
-        """
+        focus = "Independent delivery, specific tool mastery, and connecting data to business needs."
 
     prompt = f"""
-    ROLE: Expert Career Storyteller.
-    TASK: Convert the candidate's Resume into 3 high-impact STAR bullets for this Job.
+    ACT AS: A Technical Storyteller for a {job_level} candidate.
+    TASK: Turn these facts into 3 PUNCHY STAR stories.
     
     RESUME: {resume_text}
     JOB DESCRIPTION: {jd[:1000]}
-    STRATEGY: {focus_prompt}
+    STRATEGY: {focus}
     GAPS TO BRIDGE: {gaps}
 
-    FORMAT:
-    - Situation: The context.
-    - Task: The challenge.
-    - Action: THE CORE (Focus on {job_level} appropriate actions).
-    - Result: Quantifiable outcome (%, $, or hours saved).
+    STRICT RULES:
+    1. NO FLUFF: Start with the problem, end with the number (%, $, or hours).
+    2. THE MESS: Explicitly mention 'messy data' or 'unstructured records' if relevant.
+    3. THE ACTION: Focus on what YOU built or fixed (Python, SQL, Automation).
     """
 
     response = client.chat.completions.create(
         model="deepseek-chat",
         messages=[
-            {"role": "system", "content": "You are a technical storyteller who specializes in STAR format."},
+            {"role": "system", "content": "You write technical stories that sound like a hard-working engineer."},
             {"role": "user", "content": prompt}
         ]
     )
