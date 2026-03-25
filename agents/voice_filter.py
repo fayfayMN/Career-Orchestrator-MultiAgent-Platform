@@ -25,49 +25,44 @@ def judge_persona_fit(traits, weakness, style, jd, api_key):
 
 def refine_to_human_voice(draft_text, traits, user_writing_sample, job_level, api_key):
     """
-    Agent 4: The Voice Filter
-    Adjusts the seniority and tone based on the target job level.
+    Agent 4: The Voice Filter (Jargon-Blacklist Edition)
+    Rewrites AI-slop into 'Blue-Collar' professional grit.
     """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
-    # STRATEGY SELECTION LOGIC
+    # SENIORITY STRATEGY
     if job_level == "Entry/Internship":
-        strategy = """
-        TONE: The 'Hungry Automator.' 
-        Focus on: High-speed execution, documentation, reliability, and technical utility. 
-        DE-ENGINEER: Change high-level jargon (e.g., 'Architected Frameworks') to operational value (e.g., 'Streamlined Data Workflows'). 
-        Frame yourself as the person who can make the team's boring tasks disappear using advanced tools.
-        """
+        strategy = "Focus on: Cleaning data, fixing broken spreadsheets, and being a reliable workhorse."
     elif job_level == "Senior/Specialist":
-        strategy = """
-        TONE: The 'Strategic Architect.' 
-        Focus on: ROI, leadership, scaling systems, and cross-functional impact. 
-        Use high-level technical terms. Frame work as 'Institutional Improvement.'
-        """
-    else: # Associate/Professional
-        strategy = """
-        TONE: The 'Problem Solver.' 
-        Focus on: Independent project delivery, mastery of tools, and accuracy.
-        """
+        strategy = "Focus on: ROI, solving systemic business leaks, and scaling output."
+    else:
+        strategy = "Focus on: Independent project delivery and technical tool mastery."
+
+    # THE JARGON BLACKLIST
+    blacklist = [
+        "integrity", "rigor", "equipped", "initiatives", "structuring chaos", 
+        "multifaceted", "synergy", "tapestry", "meticulous", "spearheaded", 
+        "passionate", "leverage", "foster", "delivering excellence", "deep-dive"
+    ]
 
     style_guide = f"""
-    ACT AS: A career coach refining a candidate's voice for a {job_level} role.
+    ACT AS: A blunt, practical career coach for a candidate with these traits: {traits}.
     STRATEGY: {strategy}
-    USER TRAITS: {traits}
     WRITING DNA: {user_writing_sample}
     
-    CONSTRAINTS:
-    1. NO AI-SLOP: Strictly delete 'meticulous,' 'tapestry,' 'spearheaded,' or 'passionate.'
-    2. STAR FORMAT: Ensure every bullet point leads to a concrete, quantifiable result.
-    3. AUTHENTICITY: Weave in their 'Writing DNA' to keep the tone human.
+    CRITICAL RULES (NO AI-SLOP):
+    1. BLACKLIST: Never use these words: {', '.join(blacklist)}.
+    2. BLUE-COLLAR VERBS: Use verbs like: 'built', 'fixed', 'cleaned', 'ran', 'saved', 'organized'.
+    3. NO METAPHORS: Do not say 'bridge the gap' or 'structure chaos'. Say 'fix the error' or 'clean the messy data'.
+    4. PUNCHY SENTENCES: If a sentence is longer than 20 words, cut it in half.
     """
 
-    prompt = f"{style_guide}\n\nTASK: Rewrite these STAR bullets:\n{draft_text}"
+    prompt = f"{style_guide}\n\nTASK: Rewrite these STAR bullets into a human-grit cover letter/narrative:\n{draft_text}"
 
     response = client.chat.completions.create(
         model="deepseek-chat",
         messages=[
-            {"role": "system", "content": "You are a blunt, practical career coach adjusting seniority levels."},
+            {"role": "system", "content": "You are a blunt coach who hates corporate jargon. Speak like a person who does the work, not a person who writes the brochures."},
             {"role": "user", "content": prompt}
         ]
     )
