@@ -142,7 +142,14 @@ if st.session_state.analysis_results:
                     stories = draft_star_bullets(resume_input, gaps, jd_input, api_key)
                     
                     # Incorporate Job Level into the Voice Filter
-                    narrative = refine_to_human_voice(stories, traits, writing_dna, api_key)
+                   
+                    narrative = refine_to_human_voice(
+                        draft_text=stories, 
+                        traits=traits, 
+                        user_writing_sample=writing_dna, 
+                        job_level=job_level, # THIS IS THE NEW CRITICAL VARIABLE
+                        api_key=api_key
+                    )
                     
                     verify = run_fact_check(resume_input, narrative, api_key)
                     qs = generate_interview_questions(resume_input, gaps, api_key)
