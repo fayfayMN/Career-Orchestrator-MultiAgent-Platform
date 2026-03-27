@@ -1,56 +1,53 @@
-# 🚀 Career Orchestrator: Multi-Agent AI Strategy Engine
-**Bridging the gap between hidden talent and automated hiring filters through high-fidelity agentic reasoning.**
+# 🚀 Career Orchestrator: 8-Agent "Seniority-Aware" Engine
+
+**Bridging the gap between high-grit talent and automated hiring filters through dual-track agentic reasoning.**
 
 ---
 
 ### 📌 The Mission
-Traditional Applicant Tracking Systems (ATS) often create "blind spots" for high-resilience candidates, such as first-generation scholars. This platform utilizes a **7-Agent Pipeline** to audit job requirements, generate rapid-upskilling syllabi, and preserve a candidate's authentic voice through advanced reflection and multimodal interaction.
+Traditional Applicant Tracking Systems (ATS) often create "blind spots" for high-resilience candidates. This platform utilizes an **8-Agent Pipeline** to audit job requirements, generate seniority-tuned upskilling syllabi, and preserve a candidate's authentic voice through advanced semantic sanitization.
 
 ---
 
-### 🧠 System Architecture: The "Gatekeeper" Workflow
-Unlike standard LLM wrappers, this system utilizes a **Conditional Execution Pipeline** to ensure data integrity and computational efficiency. 
+### 🧠 System Architecture: The "Context-Aware" Workflow
+Unlike standard LLM wrappers, this system utilizes **Semantic Intent Filtering** to distinguish between **Analytical** (Data Science) and **Engineering** (Software) roles.
 
 | Agent | Responsibility | Key Technical Feature |
 | :--- | :--- | :--- |
-| **1. The Auditor** | Semantic Gap Analysis | **The Gatekeeper:** JSON-based scoring; halts pipeline if Match Score < 60%. |
-| **2. The Tutor** | Technical Bridging | Generates a custom **48-Hour Learning Syllabus** for identified gaps. |
-| **3. The Storyteller** | Narrative Generation | Drafts high-impact **STAR-method** bullets and professional artifacts. |
-| **4. The Voice Filter** | Human Authenticity | Strips "AI-sounding" buzzwords to restore a resilient, blunt human tone. |
-| **5. The Fact-Checker** | Data Integrity | **Reflection Agent:** Cross-references AI output against Master Resume. |
-| **6. The Composer** | Synthesis | Finalizes formal, company-specific Cover Letters. |
-| **7. The Coach** | Interview Prep | Provides technical "grills" with a **Professional Hint Layer**. |
+| **1. The Auditor** | Semantic Gap Analysis | **The Gatekeeper:** JSON-based scoring; halts pipeline if Match Score < 50%. |
+| **2. The Tutor** | Seniority-Tuned Bridging | **Smart-Pivot:** Detects role type (e.g., Software vs. Analyst) to generate level-appropriate 48-hour syllabi. |
+| **3. The Storyteller** | ATS Optimization | **ATS Engine:** Converts resume facts into professional, third-person bullets. |
+| **4. The Voice Filter** | Human Authenticity | **Semantic Sanitizer:** Restores a blunt, resilient human tone for cover letters. |
+| **5. The Fact-Checker** | Data Integrity | **Reflection Agent:** Cross-references outputs against Master Resume facts. |
+| **6. The Composer** | Synthesis | Fuses "Human Grit" stories with company-specific objectives. |
+| **7. The Resume Pro** | ATS Re-Architecting | **Keyword Injection:** Rebuilds the resume based on JD keyword frequency. |
+| **8. The Coach** | Interview Simulation | Technical "grills" with **gTTS (Text-to-Speech)** voice-over and grading. |
 
 ---
 
-### 🛠️ Tech Stack & Advanced Patterns
-* **Core Logic:** Multi-agent Orchestration (Python / DeepSeek API).
-* **Design Patterns:** * **Gatekeeper Logic:** Conditional branching based on real-time audit metrics.
-    * **Reflection:** Recursive fact-checking loops to eliminate hallucinations.
-    * **Structured Output:** Strict **JSON Parsing** for deterministic UI updates.
-* **Multimodal I/O:**
-    * **Audio:** Integrated `gTTS` (Text-to-Speech) for interviewer voice-over.
-    * **Voice:** Integrated `streamlit-mic-recorder` (Speech-to-Text) for live practice.
-* **Output Engine:** Automated `.docx` generation via `python-docx`.
+### 🛠️ Advanced Engineering Features
+* **Multimodal Ingestion Layer:** Supports binary file streams (**PDF/DOCX**) for automated resume parsing via `pdfplumber` and `python-docx`.
+* **Context-Aware Reporting:** Automated `.docx` generation that anchors all AI output to the specific **Target Company Name** and **Job Description Metadata**.
+* **Dual-Track Optimization:** Simultaneously optimizes for **Machine Algorithms** (ATS) and **Human Empathy** (Hiring Manager).
+* **Network Resilience:** Custom `APIConnectionError` handling for stable high-traffic LLM cycles.
 
 ---
 
-### 📈 Project Status: Phase 3 Complete (Production Ready)
-- [x] **Phase 1:** Core "Auditor" and "Storyteller" logic with JSON parsing.
-- [x] **Phase 2:** "Voice Filter" and "Fact-Checker" reflection loop for 100% accuracy.
-- [x] **Phase 3:** Full Multimodal Dashboard with **Voice-to-Text Interviewing** and **Gatekeeper Scoring**.
+### 📈 Project Status: Phase 5 Complete (Professional Ingestion)
+* **Phase 1-3:** Core logic, Reflection loops, and Multimodal (TTS) features.
+* **Phase 4:** **Seniority-Aware Logic** and **ATS Resume Re-Architecting**.
+* **Phase 5:** **Binary File Parsing** and **Contextual Report Generation**.
 
 ---
 
 ### 📂 Quick Start
+
 ```bash
 # 1. Clone the repository
-git clone [https://github.com/yourusername/career-orchestrator.git](https://github.com/yourusername/career-orchestrator.git)
+git clone [https://github.com/fayfayMN/Career-Orchestrator-MultiAgent-Platform.git](https://github.com/fayfayMN/Career-Orchestrator-MultiAgent-Platform.git)
 
 # 2. Install dependencies
 pip install -r requirements.txt
 
 # 3. Launch the Orchestrator
 streamlit run app.py
-
-https://career-orchestrator-multiagent-platformgit-nyoayktbvkpcsbgamg7.streamlit.app/
