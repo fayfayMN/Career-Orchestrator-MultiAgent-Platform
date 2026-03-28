@@ -1,4 +1,4 @@
-# 🚀 Career Orchestrator: The "High-Grit" Job Search Engine
+# 🚀 Career Orchestrator: The "No-Fluff" Resume & Interview Engine
 
 **Stop draining your energy on manual resume tailoring. Let 4 specialized agents bridge the gap between your unique background and the job you want.**
 
