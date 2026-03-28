@@ -80,22 +80,34 @@ with c2:
     jd_input = st.text_area("Target Job Description", height=150)
 
 # --- 8. ORCHESTRATION ---
-if st.button("🔥 Run Full Optimization") and st.session_state.resume_text:
-    if not api_key:
-        st.warning("Please enter your API Key.")
+if st.button("🔥 Run Full Optimization"):
+    # Check 1: Is resume loaded?
+    if not st.session_state.resume_text:
+        st.error("❌ No resume found! Please upload and click 'Parse Resume' in the sidebar first.")
+    # Check 2: Is API Key there?
+    elif not api_key:
+        st.warning("⚠️ Please enter your DeepSeek API Key in the sidebar.")
+    # Check 3: Is JD there?
+    elif len(jd_input) < 20:
+        st.warning("⚠️ The Job Description is too short.")
     else:
         try:
             with st.status("Orchestrating Agents...") as status:
-                st.write("Phase 1: Strategy...")
+                st.write("🕵️ Phase 1: Strategy Architect...")
                 strat = run_strategy_architect(st.session_state.resume_text, jd_input, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna)
                 
-                st.write("Phase 2: ATS Optimization...")
+                # Check if Phase 1 actually returned data
+                if "error" in strat:
+                    st.error(f"Phase 1 Failed: {strat['error']}")
+                    st.stop()
+
+                st.write("🤖 Phase 2: ATS Architect...")
                 ats = run_ats_architect(st.session_state.resume_text, strat.get('missing_gaps', []), jd_input, strat.get('persona_assessment', ''), job_level, company_name, api_key)
                 
-                st.write("Phase 3: Narrative...")
-                narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat.get('persona_assessment', 'Technical Professional'), writing_dna, company_name, api_key)
+                st.write("✍️ Phase 3: Human Narrator...")
+                narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat.get('persona_assessment', 'Professional'), writing_dna, company_name, api_key)
                 
-                st.write("Phase 4: Integrity Check...")
+                st.write("🛡️ Phase 4: Integrity Guardian...")
                 integrity = run_integrity_guardian(st.session_state.resume_text, ats, narrative, strat.get('missing_gaps', []), api_key)
                 
                 st.session_state.final_results = {"strategy": strat, "ats": ats, "narrative": narrative, "integrity": integrity}
