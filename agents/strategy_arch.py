@@ -10,32 +10,32 @@ def run_strategy_architect(resume_text, jd, job_level, company, api_key, strengt
     
     prompt = f"""
     ACT AS: A Senior Technical Career Strategist.
-    MANDATE: STRICT DATA FIDELITY. Build the strategy ONLY from the provided Resume and Persona.
+    MANDATE: Perform a Gap-to-Resource Mapping for any candidate.
     
-    CONTEXT:
-    - Candidate Resume Data: {resume_text[:2000]}
-    - Stated Strengths: {strengths}
-    - Stated Weaknesses: {weaknesses}
+    INPUT:
+    - Resume: {resume_text[:2000]}
+    - Target JD: {jd}
+    - Strengths/Weaknesses: {strengths} / {weaknesses}
     - Target: {company} ({job_level} role)
 
-    TASK: Generate a 7-Day 'Grizzled' Strategic Syllabus for {company}.
-    
-    INSTRUCTIONS:
-    1. GAPS: Identify 3 technical gaps based on the {jd}.
-    2. SYLLABUS: Create a Day 1-7 roadmap. 
-       - MUST include specific resources (e.g., 'Metropolitan State Library', 'SQLZoo', 'Python Docs').
-       - MUST include 1 'Proof-of-Concept' project based on their 70,000-row survey or AGENT.AI win [cite: 2026-01-09].
-    3. RIGOR: Ensure 'Day 5-6' focuses on bridging their 99.9% USPS accuracy to Data Integrity [cite: 2026-03-23].
+    TASK:
+    1. ANALYZE GAPS: Compare Resume skills against {jd}. Identify all the "Hard Gaps" (e.g., ETL, Cloud, HIPAA).
+    2. DISCOVER GRIT: Identify the candidate's highest-metric achievement (e.g., 99.9% accuracy, #1 ranking, or 7-year tenure) [cite: 2026-03-23, 2026-01-09].
+    3. BUILD SYLLABUS: Create a 7-Day Sprint.
+       - Day 1-2 (Gaps): Suggest 1 specific, free, high-speed resource for each Gap (e.g., 'SQLZoo', 'Microsoft Learn', or 'Metropolitan State Library').
+       - Day 3-4 (Build): Design a 'Proof-of-Concept' project that migrates their best resume project into a solution for {company}.
+       - Day 5-6 (Rigor): Explicitly bridge their 'Grit' achievement to {company}'s operational standards.
 
     OUTPUT FORMAT (STRICT JSON ONLY):
     {{
-      "match_score": 88,
-      "persona_assessment": "Short blunt assessment of their operational grit.",
-      "missing_gaps": ["List specific gaps"],
-      "learning_syllabus": "## 📅 V1 Strategic 7-Day Sprint\\n\\n- **Day 1-2 (Technical Foundation):** Master [Skill]. **Resource:** [Specific Resource/Link].\\n\\n- **Day 3-4 (The Build):** Project: '[Project Name]'. Task: Re-architect your [Resume Project] to solve [Company Problem].\\n\\n- **Day 5-6 (Operational Rigor):** Bridge 99.9% USPS accuracy to {company} data standards [cite: 2026-03-23]. Practice [Specific Task].\\n\\n- **Day 7 (Simulation):** Final drill of the A3 team's mission [cite: 2026-03-28].",
-      "strategic_priority": "The #1 thing they must prove in the interview."
+      "match_score": 0-100,
+      "persona_assessment": "Short Blunt assessment of their grit.",
+      "missing_gaps": ["List specific technical gaps"],
+      "learning_syllabus": "## 📅 Strategic 7-Day Sprint\\n\\n- **Day 1-2 (Technical Foundation):** Master [Gaps]. **Resource:** [Specific Link/Tool].\\n\\n- **Day 3-4 (The Build):** Project: '[Title]'. Task: Pivot [User Project] to solve [{company} Problem].\\n\\n- **Day 5-6 (Operational Rigor):** Bridge [User Metric] to [{company} Standard].\\n\\n- **Day 7 (Simulation):** Final drill of the [{company}] mission [cite: 2026-03-28].",
+      "strategic_priority": "The #1 thing to prove in the interview."
     }}
     """
+ 
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
