@@ -20,7 +20,10 @@ try:
     from agents.strategy_arch import run_strategy_architect
     from agents.ats_architect import run_ats_architect
     from agents.human_narrator import run_human_narrator
-    from agents.integrity import run_integrity_guardian
+    
+    # FIX: Import both the Guardian AND the Evaluator from the integrity agent
+    # this allows your 99.9% USPS accuracy stories to be graded [cite: 2026-03-23]
+    from agents.integrity import run_integrity_guardian, evaluate_and_reorg_answer 
     
 except Exception as e:
     st.error(f"🛑 Critical Load Failure: {e}")
