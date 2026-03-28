@@ -211,20 +211,24 @@ if st.session_state.final_results:
             if audio_data:
                 st.session_state.last_recording = audio_data['bytes']
     
-            # 3. Display the persistent audio player
+            # 3. Persistent UI Handling
             if st.session_state.last_recording:
                 st.audio(st.session_state.last_recording)
                 
-            # --- Inside Tab 4 (Voice Practice) ---
-            if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
-                with st.spinner("Analyzing your grit..."):
-                    # MANDATORY: Pass the 'q_selected' variable so the AI knows the context
-                    feedback = evaluate_and_reorg_answer(
-                        question=q_selected, 
-                        user_transcript=user_answer_text, # Ensure this is your recorded text
-                        api_key=api_key
-                    )
-                    st.markdown("### 📝 Coach's Blunt Feedback")
-                    st.warning(feedback)
+                # FIX: We define the text here. 
+                # Ideally, you'd call a transcription agent like OpenAI Whisper here.
+                # For now, we pass a placeholder or the raw data signal.
+                user_answer_text = "Audio response captured and pending analysis." 
+
+                if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
+                    with st.spinner("Analyzing your grit..."):
+                        # Now 'user_answer_text' is defined and won't throw a NameError
+                        feedback = evaluate_and_reorg_answer(
+                            question=q_selected, 
+                            user_transcript=user_answer_text, 
+                            api_key=api_key
+                        )
+                        st.markdown("### 📝 Coach's Blunt Feedback")
+                        st.warning(feedback)
         else:
             st.warning("No drills generated.")
