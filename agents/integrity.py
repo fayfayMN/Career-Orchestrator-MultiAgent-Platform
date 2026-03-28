@@ -11,16 +11,18 @@ def run_integrity_guardian(resume_text, ats_data, narrative_data, gaps, api_key)
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
     # We pass the 'Gaps' and 'Resume' so the AI knows exactly where to push
+  
     prompt = f"""
     ACT AS: A Technical Interviewer & Career Coach.
     TRUTH SOURCE: {resume_text[:1500]}
     IDENTIFIED GAPS: {gaps}
 
     TASK:
-    1. Generate 3 'Grilling' interview questions based on the candidate's technical gaps.
-    2. For EACH question, write a 'Strategic Hint' that explicitly tells the candidate how to bridge their 
-       specific wins (99.9% USPS accuracy [cite: 2026-03-23] or AGENT.AI #1 Win [cite: 2026-01-09]) 
-       to the interviewer's concern.
+    1. Generate 3 'Grilling' interview questions based on {job_level} technical gaps.
+    2. For EACH question, write a 'Strategic Hint'. 
+       MANDATE: Identify the candidate's strongest metric or win from the provided resume (e.g., accuracy percentages, rankings, or years of service) 
+       and bridge it to the interviewer's specific concern.
+    """
 
     OUTPUT FORMAT (STRICT JSON ONLY):
     {{
