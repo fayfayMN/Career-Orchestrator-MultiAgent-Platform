@@ -70,3 +70,35 @@ if st.session_state.final_results:
         data="Report Content Placeholder", 
         file_name=f"{company_name}_Analysis.docx"
     )
+
+# app.py (At the end of the script)
+
+if st.session_state.final_results.get('integrity'):
+    # This pulls data from your Consolidated Layer 4
+    integrity_data = st.session_state.final_results['integrity']
+    questions = integrity_data.get('interview_questions', {})
+
+    st.divider()
+    st.header("🎙️ Interactive Voice Practice")
+
+    # 1. UI Selection
+    q_key = st.selectbox("Select Question to Practice:", list(questions.keys()))
+    current_q = questions[q_key]
+
+    # 2. Logic: Hear the AI speak (TTS)
+    if st.button("📢 Hear AI Interviewer"):
+        audio_bytes = speak_text(current_q)
+        st.audio(audio_bytes, format='audio/mp3')
+
+    # 3. Logic: Record your response (Ingestion)
+    st.write("Record your STAR answer:")
+    wav_audio_data = st_audiorec()
+
+    # 4. Logic: Call the Agent for Feedback
+    if wav_audio_data is not None:
+        # Note: You will need a Speech-to-Text (STT) step here 
+        # (e.g., using OpenAI Whisper or a similar model)
+        with st.spinner("Analyzing your grit..."):
+            # feedback = evaluate_interview_voice(current_q, transcribed_text, api_key)
+            st.info("Analysis Complete. Check your STAR metrics below.")
+            
