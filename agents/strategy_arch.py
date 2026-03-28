@@ -6,31 +6,44 @@ def run_strategy_architect(resume_text, jd, job_level, company, api_key, strengt
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
     prompt = f"""
-    ACT AS: A Senior Technical Career Strategist.
+    ACT AS: A Technical Mentor & Career Strategist.
     MANDATE: Perform a 'Differential Gap Analysis' between Resume and JD.
     
-    INPUT DATA:
+    INPUT:
     - Resume: {resume_text[:2000]}
-    - Target JD: {jd}
-    - User Context: Strengths({strengths}), Weaknesses({weaknesses})
     - Target: {company} ({job_level} role)
+    - JD: {jd[:1500]}
+    - User Context: Strengths({strengths}), Weaknesses({weaknesses})
 
-    TASK:
-    # Inside the prompt:
-    "1. GAP IDENTIFICATION: Compare Resume to {jd}. Identify 3 'High-Risk' gaps, specifically looking for industry compliance (e.g., HIPAA, 21 CFR Part 11) or advanced tool requirements (e.g., ETL pipelines, Warehousing)."
-    2. RESOURCE MAPPING: For each gap, provide a specific, high-depth learning link (e.g., GitHub Zoomcamps, Documentation, or SQLZoo). [cite: 46]
-    3. PROJECT PIVOT: Identify the user's strongest existing project and re-architect it as a solution for {company}. 
-    4. GRIT BRIDGE: Find the highest 'Accuracy' or 'Tenure' metric in the resume. Bridge it to {company}'s operational standards.
+    TASK: Generate a 7-Day 'Actionable Workbook' Syllabus. 
+    
+    STYLE REQUIREMENTS (STRICT):
+    For every technical gap identified, use this exact structure:
+    ### **[Skill Name]**
+    **THE FUNDAMENTAL:** [1-sentence core concept to master]
+    **THE RESOURCE:** [Specific Clickable Markdown Link to GitHub, SQLZoo, or Documentation]
+    **THE MINI-PROJECT:** [A 2-hour task to prove the skill using their {resume_text} data]
+    **INTERVIEW TALKING POINT:** [A STAR-based script bridging their grit to this new skill]
 
-    OUTPUT FORMAT (STRICT JSON ONLY):
+    DAY-BY-DAY STRUCTURE:
+    - Day 1-2: Core Technical Gaps (e.g., SQL, Jira, Power BI).
+    - Day 3-4: The Build. Project: 'Pivot [User's Best Project] into a {company} Solution'.
+    - Day 5-6: Operational Rigor. Bridge their highest metric (e.g., 99.9% USPS accuracy [cite: 2026-03-23]) to {company} standards.
+    - Day 7: Final Simulation & Mission Drill [cite: 2026-03-28].
+
+    OUTPUT FORMAT (STRICT JSON):
     {{
       "match_score": 0-100,
-      "persona_assessment": "Blunt assessment of their grit.",
+      "persona_assessment": "Blunt assessment of grit.",
       "missing_gaps": ["Gap 1", "Gap 2", "Gap 3"],
-      "learning_syllabus": "## 📅 Strategic 7-Day Sprint\\n\\n- **Day 1-2 (Technical Foundation):** Master [Gap Name]. **Resource:** [Clickable Markdown Link].\\n\\n- **Day 3-4 (The Build):** Project: '[Title]'. Task: Pivot [User's Best Project] to solve [{company} Problem].\\n\\n- **Day 5-6 (Operational Rigor):** Bridge [User Metric] to [{company} Standard].\\n\\n- **Day 7 (Simulation):** Final drill of the [{company}] mission [cite: 2026-03-28].",
-      "strategic_priority": "The #1 thing they must prove in the interview."
+      "learning_syllabus": "[INSERT FULL MARKDOWN SYLLABUS HERE]",
+      "strategic_priority": "The #1 thing to prove in the interview."
     }}
     """
+    
+
+
+
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
