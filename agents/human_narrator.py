@@ -11,31 +11,43 @@ def run_human_narrator(resume_text, jd, persona, writing_dna, company, job_level
     blacklist = ["synergy", "spearheaded", "passionate", "leverage", "vibrant", "dynamic", "medication", "pharma"]
 
     prompt = f"""
-    ACT AS: A Technical Career Narrative Architect.
-    STRICT RULE: Analyze this JD: {jd[:1500]}. ONLY use industry themes found there.
-    Linguistic DNA: {style_sample[:1000] if style_sample else writing_dna}
+    ACT AS: A Technical Recruiter & Narrative Strategist.
+    STRICT RULE: Focus 100% on Business ROI and Technical Efficiency.
     
-    TASK: Write a 3-paragraph Cover Letter for a {job_level} role at {company}.
-    
-    DYNAMIC LOGIC:
+    CONTEXT:
+    - Target: {company} ({job_level})
+    - Tech Stack needed in JD: {jd[:1000]}
+    - Candidate Evidence: {resume_text[:2000]}
+
+    TASK: Write a 3-paragraph "High-Signal" Cover Letter.
+
+    DYNAMIC LOGIC FOR IMPROVEMENT:
     1. THE HOOK ({job_level}): 
        - If 'Intern/Junior': Focus on GPA, competition wins, and 'Eagerness to contribute' to {company}'s specific tech stack.
        - If 'Senior/Lead': Focus on ROI, team leadership, and architectural vision.
+       - THE RUTHLESS HOOK: Do NOT start with "I am writing to...". Start with a 'Headline Achievement'. 
+       - e.g., "As the 1st Place winner of the MN AGENT.AI competition, I specialize in transforming raw datasets into executive insights." [cite: 24, 27]
     
-    2. THE STAR BRIDGE: 
+    2. CONCRETE TOOL INTEGRATION: You MUST explicitly name 3-4 tools from the JD (e.g., SQL, Power BI, Jira, Python) and link them to a specific project outcome from the resume. [cite: 59, 60, 80, 82]
+    
+    3. THE BUSINESS PIVOT: Replace "abstract help" with "operational efficiency." 
+       - Instead of 'helping people', explain how you 'reduce repeat work', 'ensure data integrity', or 'automate manual reporting'. [cite: 58, 74, 84, 99]
+       -  THE ALIGNMENT: Reference {company}'s mission (e.g., 'assembling TVs in the USA' for Element).
+       
+    4. STAR-BASED PRECISION: Every claim must follow: [Technical Tool] + [Action] = [Measurable Business Result].
        - Search {resume_text} for the candidate's highest quantitative metric (e.g., %, $, #, or ranking).
        - If no metric exists, identify their most significant technical project outcome.
        - PIVOT that specific achievement to solve a core problem found in the {company} JD.
-    3. THE ALIGNMENT: Reference {company}'s mission (e.g., 'assembling TVs in the USA' for Element). [cite: 85]
 
-    VETO: Strictly avoid {', '.join(blacklist)}.
+    VETO: {', '.join(blacklist)}. No long, abstract sentences. Keep it punchy.
     
     OUTPUT FORMAT (STRICT JSON ONLY):
     {{
-      "cover_letter_narrative": "Subject: {job_level} Application - {company}\\n\\nDear Hiring Manager,\\n\\n[Para 1: Level-Appropriate Hook]\\n\\n[Para 2: STAR-based Pivot using Metrics]\\n\\n[Para 3: Mission Alignment]\\n\\nSincerely,\\n\\n[Name]",
-      "value_anchor": "Briefly state the specific bridge between the candidate and {company}."
+      "cover_letter_narrative": "Subject: {job_level} Application - {company}\\n\\nDear Hiring Manager,\\n\\n[Para 1: The Technical Headline]\\n\\n[Para 2: Tool-Specific Impact Bridge]\\n\\n[Para 3: Call to Action with Company Mission Alignment]\\n\\nSincerely,\\n\\n[Name]",
+      "value_anchor": "Bridge between [Candidate Tool/Metric] and [{company} Operational Problem]."
     }}
     """
+    
 
     try:
         response = client.chat.completions.create(
