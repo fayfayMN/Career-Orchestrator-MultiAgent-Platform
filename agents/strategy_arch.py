@@ -9,32 +9,29 @@ def run_strategy_architect(resume_text, jd, job_level, company, api_key, strengt
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
     prompt = f"""
-    ACT AS: A Technical Strategy Lead.
-    TASK: Generate a 1-week preparation roadmap for {company}.
+    ACT AS: A Senior Technical Career Strategist.
+    MANDATE: STRICT DATA FIDELITY. Build the strategy ONLY from the provided Resume and Persona.
     
-    INPUTS:
-    - Resume: {resume_text[:1500]}
-    - Gaps identified by user: {weaknesses}
-    
-    MANDATE: 
-    - Provide a specific 7-day syllabus.
-    - Include 1 'Proof-of-Concept' project to close a gap.
-    - Provide resource types (e.g., 'Documentation for AWS S3' or 'LeetCode SQL').
+    CONTEXT:
+    - Candidate Resume Data: {resume_text[:2000]}
+    - Stated Strengths: {strengths}
+    - Stated Weaknesses: {weaknesses}
+    - Target: {company} ({job_level} role)
+
+    TASK: Generate a 7-Day 'Grizzled' Strategy tailored to THIS specific candidate.
+    1. IDENTIFY GAPS: Compare the {jd} against the provided Resume. List real technical gaps.
+    2. THE SYLLABUS: Provide a day-by-day prep guide to close those gaps.
+    3. THE PROJECT: Suggest a 'Proof-of-Concept' project based on a real project found in the candidate's Resume to solve a {company} problem.
 
     OUTPUT FORMAT (STRICT JSON):
     {{
-      "match_score": 85,
-      "persona_assessment": "Grizzled Data Realist with 99.9% USPS accuracy [cite: 2026-03-23].",
-      "missing_gaps": ["List 2-3 specific technical gaps"],
-      "learning_syllabus": "## 📅 V1 Strategic 7-Day Sprint\\n
-      - **Day 1-2 (Technical Gaps):** Focus on [Gap 1]. Resource: [Specific Resource].\\n
-      - **Day 3-4 (The Project):** Build a [Mini-Project Name] to demonstrate [Skill].\\n
-      - **Day 5-6 (Compliance/Integrity):** Review HIPAA and Pharmaceutical Data Integrity for {company} [cite: 2026-03-28].\\n
-      - **Day 7 (Simulation):** Final drill focusing on the A3 Team's mission.",
-      "strategic_priority": "Bridge the gap between academic theory and operational reliability."
+      "match_score": 0,
+      "persona_assessment": "Short blunt summary of the candidate's unique value.",
+      "missing_gaps": ["List specific gaps"],
+      "learning_syllabus": "## 📅 V1 Strategic 7-Day Sprint\\n- **Day 1-2:** Master [Skill].\\n- **Day 3-4:** Build [Project name based on their resume].\\n- **Day 5-6:** Focus on [Soft skill/Compliance].\\n- **Day 7:** Final Simulation.",
+      "strategic_priority": "The #1 thing this specific person needs to prove."
     }}
     """
-    
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
