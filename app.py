@@ -213,21 +213,22 @@ if st.session_state.final_results:
         st.text_area("Review your Letter:", letter, height=400)
         st.download_button("📥 Download Report (.docx)", generate_docx_report(company_name, job_level, jd_input, res), file_name=f"{company_name}_Career_Pack.docx")
 
+    # --- app.py (Tab 4) ---
     with t4:
         st.subheader("🎙️ Interactive Technical Drill")
-        # Fixed internal indent here
-        questions = res['integrity'].get('interview_questions', {})
+        # Get the list of dynamic drills from the updated agent
+        drills = res.get('integrity', {}).get('interview_drills', [])
         
-        if questions:
-            q_selected = st.selectbox("Select Drill:", list(questions.values()))
+        if drills:
+            # Create a dictionary for the selectbox: {QuestionText: HintText}
+            drill_map = {d['question']: d['strategic_hint'] for d in drills}
+            q_selected = st.selectbox("Select Drill:", list(drill_map.keys()))
+            
             st.info(f"**Challenge:** {q_selected}")
             
-            with st.expander("💡 View Strategic Hint (STAR Method)"):
-                st.write("To nail this for the A3 Team, focus on:")
-                st.write("- **Situation:** Briefly describe the 70,000-row survey or AGENT.AI context [cite: 2026-01-09, 2026-03-11].")
-                st.write("- **Task:** What was the specific data bottleneck (e.g., messy SQL joins)?")
-                st.write("- **Action:** Use 'Workhorse' verbs: *Engineered, Normalized, Architected*.")
-                st.write("- **Result:** Mention the 1st Place win or the 99.9% USPS accuracy [cite: 2026-03-23].")
+            # DYNAMIC HINT: This now changes based on the selectbox choice
+            with st.expander("💡 View Strategic Hint (Tailored STAR)"):
+                st.write(drill_map[q_selected])
             
             if st.button("📢 Hear Question"):
                 tts = gTTS(text=q_selected, lang='en')
