@@ -56,7 +56,9 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 ---
-## 🛠️ Development Log & Optimization Journal   03/27/2026
+<details>
+<summary><h2>Development Log & Optimization Journal</h2></summary
+## 🛠️  03/27/2026
 
 This section tracks the architectural evolution of the Career Orchestrator, highlighting key technical challenges and engineering pivots.
 
@@ -93,3 +95,4 @@ This section tracks the architectural evolution of the Career Orchestrator, high
     * **Layer 3 (The Human Narrator):** Combines **Voice Filter** and **Composer** to draft the cover letter directly in a "Human-Grit" tone.
     * **Layer 4 (The Integrity Guardian):** Fuses **Fact-Checker** and **Coach** to validate data fidelity and generate interview prep in one verification cycle.
 * **Impact:** Reduced API token consumption by **~40%** and simplified the `asyncio` parallelization logic, resulting in a more maintainable codebase for the **Life Time** digital-first environment.
+<\details>
