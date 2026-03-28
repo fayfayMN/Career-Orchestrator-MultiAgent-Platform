@@ -5,4 +5,7 @@ langchain-openai
 python-docx
 streamlit-mic-recorder
 gTTS
-pip install streamlit-audio-recorder gTTS
+streamlit
+openai
+pdfplumber
+st-audiorec
