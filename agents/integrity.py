@@ -48,3 +48,23 @@ def run_integrity_guardian(master_resume, ai_generated_bullets, ai_cover_letter,
         return json.loads(response.choices[0].message.content)
     except Exception as e:
         return {"error": str(e)}
+
+def evaluate_interview_voice(question, transcribed_answer, api_key):
+    """
+    Refined Layer 4 Evaluator: Grades based on Technical Accuracy + STAR Method.
+    """
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+
+    prompt = f"""
+    ACT AS: A Blunt Technical Interviewer.
+    QUESTION: {question}
+    CANDIDATE ANSWER: {transcribed_answer}
+
+    RUBRIC:
+    - S/T (Situation/Task): Was the context clear?
+    - A (Action): Did they name specific tools (Python, SQL, etc.)?
+    - R (Result): Did they use a hard metric (%, $, #)?
+    
+    TASK: Provide 'Blunt Feedback'. If they used 'AI-slop' (e.g., 'leveraged synergy'), penalize them.
+    """
+    # ... (Return JSON with Score 1-10 and Bulleted Feedback)
