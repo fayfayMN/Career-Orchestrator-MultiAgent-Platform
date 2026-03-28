@@ -183,16 +183,43 @@ if st.session_state.final_results:
     with t4:
         st.subheader("🎙️ Interactive Technical Drill")
         drills = res.get('integrity', {}).get('interview_drills', [])
+        
         if drills:
+            # 1. State Persistence for Audio
+            if 'last_recording' not in st.session_state:
+                st.session_state.last_recording = None
+    
             drill_map = {d['question']: d['strategic_hint'] for d in drills}
             q_selected = st.selectbox("Select Drill:", list(drill_map.keys()))
+            
             st.info(f"**Challenge:** {q_selected}")
             with st.expander("💡 View Strategic Hint (Tailored STAR)"):
                 st.write(drill_map[q_selected])
+    
             if st.button("📢 Hear Question"):
                 tts = gTTS(text=q_selected, lang='en')
                 audio_fp = BytesIO()
                 tts.write_to_fp(audio_fp)
                 st.audio(audio_fp.getvalue(), format='audio/mp3')
+    
             st.divider()
             st.write("Record your answer:")
+            
+            # 2. Capture and store audio immediately
+            audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key=f'mic_{q_selected}')
+            
+            if audio_data:
+                st.session_state.last_recording = audio_data['bytes']
+    
+            # 3. Display the persistent audio player
+            if st.session_state.last_recording:
+                st.audio(st.session_state.last_recording)
+                
+                if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
+                    with st.spinner("Analyzing your grit..."):
+                        # Pass the stored recording to your evaluator
+                        feedback = evaluate_and_reorg_answer(q_selected, "Audio response provided.", api_key)
+                        st.markdown("### 📝 Coach's Blunt Feedback")
+                        st.warning(feedback)
+        else:
+            st.warning("No drills generated.")
