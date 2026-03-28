@@ -21,7 +21,7 @@ try:
     from agents.ats_architect import run_ats_architect
     from agents.human_narrator import run_human_narrator
     from agents.integrity import run_integrity_guardian
-    from agents.interviewer import evaluate_answer # Restored Coach
+    
 except Exception as e:
     st.error(f"🛑 Critical Load Failure: {e}")
     st.stop()
