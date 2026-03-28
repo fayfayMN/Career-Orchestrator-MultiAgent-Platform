@@ -3,4 +3,4 @@ openai
 pdfplumber
 python-docx
 gTTS
-streamlit-audio-recorder
+git+https://github.com/stefanrmmr/streamlit-audio-recorder.git
