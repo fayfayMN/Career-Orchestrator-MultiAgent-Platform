@@ -1,65 +1,54 @@
 import streamlit as st
+import pdfplumber
 import sys
 import os
-import pdfplumber
 from io import BytesIO
 from docx import Document
 from gtts import gTTS
 from st_audiorec import st_audiorec
 
 # --- 1. THE PATH FIX (Log 05) ---
-# Get the absolute path of the directory where app.py lives
+# This forces the Streamlit server to see your 'agents' folder
 root_path = os.path.dirname(os.path.abspath(__file__))
-
-# Force Python to look in the root folder for the 'agents' package
 if root_path not in sys.path:
     sys.path.insert(0, root_path)
 
-# --- 2. THE VISUAL DEBUGGER ---
-# This will show up in your sidebar to help us find the mismatch
+# --- 2. CONFIGURATION (MUST BE FIRST STREAMLIT CALL) ---
+st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")
+
+# --- 3. THE VISUAL DEBUGGER (Sidebar) ---
 with st.sidebar:
-    st.divider()
-    st.subheader("DEBUG: File System")
+    st.subheader("🛠️ System Debugger")
     try:
         visible_files = os.listdir(root_path)
-        st.write(f"Files in Root: {visible_files}")
-        
-        # Check for 'agents' folder specifically (Case Sensitive!)
+        st.write(f"Root: {visible_files}")
         if 'agents' in visible_files:
-            agents_contents = os.listdir(os.path.join(root_path, 'agents'))
-            st.write(f"Inside 'agents/': {agents_contents}")
+            st.success("✅ 'agents' folder found")
+            st.write(f"Contents: {os.listdir(os.path.join(root_path, 'agents'))}")
         else:
-            st.error("❌ 'agents' folder not found in root!")
+            st.error("❌ 'agents' folder NOT found")
     except Exception as e:
-        st.write(f"Debug Error: {e}")
+        st.write(f"Path Error: {e}")
     st.divider()
 
-# --- 3. IMPORT GENERALIZED AGENTS ---
+# --- 4. IMPORT GENERALIZED AGENTS ---
 try:
-    # We import directly from the package
     from agents.strategy_arch import run_strategy_architect
     from agents.ats_architect import run_ats_architect
     from agents.human_narrator import run_human_narrator
     from agents.integrity import run_integrity_guardian
 except Exception as e:
     st.error(f"🛑 Critical Load Failure: {e}")
-    st.info("Check sidebar for folder names. Is it 'agents' or 'Agents'?")
+    st.info("Check sidebar Debugger. Is the folder named 'agents' (lowercase)?")
     st.stop()
 
-# --- 4. CONFIGURATION & STATE ---
-st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")
-
-# If you had a stop() here by mistake, delete it unless it's inside an 'except' block.
-
-# --- 3. CONFIGURATION & STATE ---
-st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")
-
+# --- 5. SESSION STATE INITIALIZATION ---
 if 'resume_text' not in st.session_state:
     st.session_state.resume_text = ""
 if 'final_results' not in st.session_state:
     st.session_state.final_results = None
 
-# --- 4. HELPERS: DOWNLOAD ENGINE ---
+# --- 6. HELPERS: DOWNLOAD ENGINE ---
 def generate_docx_report(company, level, jd, results):
     doc = Document()
     doc.add_heading(f"Strategy Report: {company}", 0)
@@ -86,12 +75,11 @@ def generate_docx_report(company, level, jd, results):
     doc.save(bio)
     return bio.getvalue()
 
-# --- 5. SIDEBAR: PERSONA DISCOVERY ---
+# --- 7. SIDEBAR: PERSONA DISCOVERY ---
 with st.sidebar:
     st.header("👤 Persona Discovery")
     api_key = st.text_input("DeepSeek API Key", type="password")
     
-    # Generalized inputs for any job seeker
     user_strengths = st.text_area("Your Top 3 Strengths", placeholder="e.g., Reliability, Python, Grit")
     user_weaknesses = st.text_area("Gaps/Weaknesses", placeholder="e.g., Public speaking")
     writing_dna = st.selectbox("Writing Style", ["Blunt & Gritty", "Professional", "Academic"])
@@ -110,7 +98,7 @@ with st.sidebar:
                 st.session_state.resume_text = "\n".join([p.text for p in doc.paragraphs])
         st.success("✅ Resume Loaded")
 
-# --- 6. MAIN UI ---
+# --- 8. MAIN UI ---
 st.title("🚀 Career Orchestrator: Multi-Agent Platform")
 c1, c2 = st.columns(2)
 
@@ -120,32 +108,28 @@ with c1:
 with c2:
     jd_input = st.text_area("Target Job Description", height=150)
 
-# --- 7. GENERALIZED ORCHESTRATION ---
+# --- 9. GENERALIZED ORCHESTRATION ---
 if st.button("🔥 Run Full Optimization") and st.session_state.resume_text:
     if not api_key:
-        st.warning("Enter your API Key in the sidebar.")
+        st.warning("Please enter your API Key in the sidebar.")
     else:
         with st.status("Orchestrating Agents...") as status:
-            # Phase 1: Strategy & Persona Discovery
             st.write("Phase 1: Analyzing Persona...")
             strat = run_strategy_architect(st.session_state.resume_text, jd_input, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna)
             
-            # Phase 2: ATS keyword mapping
             st.write("Phase 2: Optimizing Keywords...")
             ats = run_ats_architect(st.session_state.resume_text, strat.get('missing_gaps', []), jd_input, strat.get('persona_assessment', ''), job_level, company_name, api_key)
             
-            # Phase 3: Human Voice Narrative
             st.write("Phase 3: Crafting Narrative...")
             narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat.get('persona_assessment', 'Technical Professional'), writing_dna, company_name, api_key)
             
-            # Phase 4: Final Fact-Check
             st.write("Phase 4: Integrity Audit...")
             integrity = run_integrity_guardian(st.session_state.resume_text, ats, narrative, strat.get('missing_gaps', []), api_key)
             
             st.session_state.final_results = {"strategy": strat, "ats": ats, "narrative": narrative, "integrity": integrity}
             status.update(label="✅ Optimization Complete!", state="complete")
 
-# --- 8. RESULTS DISPLAY ---
+# --- 10. RESULTS DISPLAY ---
 if st.session_state.final_results:
     res = st.session_state.final_results
     st.divider()
