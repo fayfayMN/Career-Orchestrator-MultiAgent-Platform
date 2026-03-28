@@ -77,5 +77,5 @@ v2.0: The **"Truth & Precision" **Sprint (03/28/2026)
 
 * **Bug Fix (Anti-Hallucination)**: Re-engineered prompt logic to distinguish between "Verifiable Achievements" and "Learning Goals," framing unfamiliar tools as "Learning Labs".
 
-Style Enforcement: Implemented a Label Ban in the ATS Architect to replace "Problem/Method" tags with professional, copy-paste ready resume bullets.
+* **Style Enforcement**: Implemented a Label Ban in the ATS Architect to replace "Problem/Method" tags with professional, copy-paste ready resume bullets.
 </details>
