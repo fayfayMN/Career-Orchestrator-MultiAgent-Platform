@@ -1,3 +1,7 @@
+# Add this right after Section 1: PATH RESILIENCE
+import logging
+logging.basicConfig(level=logging.INFO)
+
 import streamlit as st
 import pdfplumber
 import sys
