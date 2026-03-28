@@ -157,9 +157,33 @@ if st.session_state.final_results:
         st.markdown(res['strategy'].get('learning_syllabus', ''))
     
     with t2:
-        for item in res['ats'].get('optimized_bullets', []):
-            st.markdown(f"#### {item.get('Role')}")
-            for bullet in item.get('Bullets', []): st.write(f"✅ {bullet}")
+    st.subheader("🎯 ATS-Optimized Impact Bullets")
+    
+    # Safely pull the new dynamic keys
+    ats_data = res.get('ats', {})
+    
+    if ats_data:
+        # 1. Display the Recruiter Verdict
+        st.success(f"**Recruiter Scan Verdict:** {ats_data.get('recruiter_scan_verdict', 'No verdict generated.')}")
+        
+        # 2. Display the Keyword Infiltration List
+        keywords = ats_data.get('ats_keywords_hit', [])
+        st.write(f"**Keywords Infiltrated:** {', '.join(keywords) if keywords else 'None identified.'}")
+        
+        st.divider()
+
+        # 3. Iterate through the NEW key: 'optimized_experience'
+        experience_list = ats_data.get('optimized_experience', [])
+        
+        if experience_list:
+            for item in experience_list:
+                with st.expander(f"📂 {item.get('Role', 'Unknown Role')}"):
+                    for bullet in item.get('Bullets', []):
+                        st.write(bullet)
+        else:
+            st.warning("No experience bullets were generated. Check your agent's JSON output.")
+    else:
+        st.error("ATS Data missing. Please rerun the orchestration.")
 
     with t3:
         st.subheader("✉️ Formal Persona-Driven Cover Letter")
