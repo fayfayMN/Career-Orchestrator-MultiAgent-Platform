@@ -1,6 +1,6 @@
-streamlit
-openai
+streamlit>=1.30.0
 pdfplumber
 python-docx
+openai
 gTTS
-git+https://github.com/stefanrmmr/streamlit-audio-recorder.git
+streamlit-mic-recorder
