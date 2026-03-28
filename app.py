@@ -121,21 +121,32 @@ if st.button("🔥 Run Full Optimization"):
         except Exception as e:
             st.error(f"❌ Orchestration Error: {e}")
 
-# --- 9. RESULTS ---
+# --- 9. RESULTS DISPLAY: THE PROFESSIONAL SHOWCASE ---
 if st.session_state.final_results:
     res = st.session_state.final_results
     st.divider()
-    report_bytes = generate_docx_report(company_name, job_level, jd_input, res)
-    st.download_button(label=f"📥 Download Report", data=report_bytes, file_name=f"{company_name}_Report.docx")
     
-    t1, t2, t3 = st.tabs(["📊 Strategy", "📄 ATS Resume", "🎙️ Voice Practice"])
+    # RESTORED: The "Persona Summary" (Replaces the lost Cover Letter)
+    st.subheader("👤 Professional Persona & Grit")
+    st.success(res['narrative'].get('cover_letter_narrative', "Narrative engine warming up..."))
+
+    t1, t2, t3 = st.tabs(["📊 Strategy", "📄 Optimized Resume Style", "🎙️ Voice Practice"])
     
     with t1:
         st.metric("Match Score", f"{res['strategy'].get('match_score', 0)}%")
         st.markdown(res['strategy'].get('learning_syllabus', ''))
     
     with t2:
-        st.json(res['ats']) 
+        st.subheader("📝 Tailored Experience (ATS-Ready)")
+        # This loop turns the JSON into a clean, resume-like list
+        for item in res['ats'].get('optimized_bullets', []):
+            st.markdown(f"#### {item.get('Role')}")
+            for bullet in item.get('Bullets', []):
+                st.write(f"✅ {bullet}")
+            st.write("") # Spacer
+
+    with t3:
+        # ... (Your existing Voice Practice code)
     
     with t3:
         st.subheader("Interactive Interview Drill")
