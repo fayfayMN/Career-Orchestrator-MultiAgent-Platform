@@ -2,52 +2,43 @@
 import json
 from openai import OpenAI
 
-#  Add 'gaps' to the signature
-# agents/ats_architect.py
-
 def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writing_dna):
-    # This matches the 7-item call from app.py
-    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
-    
     """
     Dynamic Layer 2: The Impact-First Resume Rewriter.
-    Updated to handle 7 arguments to match the app.py handshake.
+    Tailors resume bullets to any level without hallucinating industry experience.
     """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
-
-    # The 'Workhorse' Verb List from your guide
-    verbs = "Analyzed, Modeled, Evaluated, Engineered, Built, Trained, Optimized, Deployed, Designed, Automated"
-
     prompt = f"""
-    ACT AS: A Senior Technical Resume Architect.
-    MANDATE: Perform a COMPLETE RECONSTRUCTION of the candidate's history.
+    ACT AS: An expert Technical Resume Writer.
+    MANDATE: STRICT NON-HALLUCINATION. Distinguish between 'Resume Bullets' and 'Interview Logic'.
     
     INSTRUCTIONS:
-    1. DISCOVERY: Identify EVERY distinct work experience, project, and volunteer block in: {resume_text}. Do not truncate.
-
-    2. THE PIVOT: Frame existing projects as 'Technical Foundations' for {company}.
-       - INSTRUCTION: Do NOT claim the user has direct experience in {company}'s specific industry if it is not in the resume.
-       - INSTRUCTION: Instead, frame their technical methods (e.g., Python scripts, SQL queries, or data cleaning) as 'directly applicable foundations' for {company}'s specific needs (e.g., PIM audits or eCommerce automation).
-
+    1. DISCOVERY: Identify every distinct project/role in: {resume_text[:2000]}.
+    2. THE PIVOT: Tailor technical methods (e.g., Python, SQL, Power BI) as 'Foundations' for {company}'s needs.
+       - RULE: Do NOT claim the user has direct experience in {company}'s specific industry if it is not in the resume.
+       - RULE: Frame existing technical tasks as 'directly applicable foundations' for {company}'s specific needs (e.g., Jira workflows or PIM audits).
     3. METRIC GROUNDING: 
-       - INSTRUCTION: Identify the candidate's highest quantitative metric or award (e.g., accuracy percentages, rankings, or tenure) [cite: 2026-03-23, 2026-01-09].
-       - INSTRUCTION: Keep these metrics as 'Proof of Operational Reliability' and 'Analytical Rigor' rather than falsely claiming they occurred in {company}'s domain.
-    
-    
-    4. METRIC EXTRACTION: Search the resume for every possible number (%, $, row counts, rankings) and embed them into the Result bullets.
+       - Identify the candidate's highest quantitative metric or award (e.g., accuracy percentages, rankings, or tenure) [cite: 2026-03-23, 2026-01-09].
+       - Keep these metrics as 'Proof of Operational Reliability' and 'Analytical Rigor' rather than falsely claiming they occurred in {company}'s domain.
+    4. THE RESUME FORMULA (STRICT): 
+       - Header: **Role/Project Title** | [Tools Used]
+       - Bullet 1: [Action Verb] + [Technical Task] to solve [Business Problem].
+       - Bullet 2: [Action Verb] + [Quantifiable Metric] (e.g., 99.9% accuracy or 70k rows) using [Tool]. [cite: 2026-03-23, 80, 83]
+       - Bullet 3: [Action Verb] + [Business Impact] (e.g., reduced repeat work or improved data integrity). [cite: 58, 74, 84]
+    5. NO LABELS: Do NOT use 'Problem:', 'Method:', or 'Result:' tags. Use professional, seamless sentences.
 
     OUTPUT FORMAT (STRICT JSON ONLY):
     {{
       "optimized_experience": [
         {{
-          "Role": "Title found in resume",
-          "Tech_Stack": "Tools identified for this specific block",
-          "Bullets": ["• [Bullet 1]", "• [Bullet 2]", "• [Bullet 3]", "• [Bullet 4]"]
+          "Role": "Title",
+          "Tech_Stack": "Tools",
+          "Bullets": ["Bullet 1", "Bullet 2", "Bullet 3"]
         }}
       ],
-      "recruiter_scan_verdict": "Blunt 1-sentence assessment of candidate's grit and technical fit.",
-      "ats_keywords_hit": ["List of keywords from the JD found and included"]
+      "recruiter_scan_verdict": "Blunt 1-sentence assessment of grit and fit.",
+      "ats_keywords_hit": ["Keyword1", "Keyword2"]
     }}
     """
     try:
@@ -58,7 +49,7 @@ def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writin
         )
         content = response.choices[0].message.content.strip()
         
-        # MANDATORY: Strip Markdown backticks that break json.loads()
+        # Mandatory: Strip Markdown backticks
         if content.startswith("```"):
             content = content.split("```")[1]
             if content.startswith("json"):
@@ -67,11 +58,9 @@ def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writin
             
         return json.loads(content)
     except Exception as e:
-        # Returning a structured error helps the UI tell you WHAT went wrong
         return {
             "optimized_experience": [],
             "recruiter_scan_verdict": f"Error: {str(e)}",
             "ats_keywords_hit": []
         }
-
       
