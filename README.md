@@ -54,6 +54,7 @@ pip install -r requirements.txt
 
 # 3. Launch the Orchestrator
 streamlit run app.py
+```
 ---
 ## 🛠️ Development Log & Optimization Journal   03/27/2026
 
