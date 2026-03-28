@@ -12,30 +12,26 @@ def run_human_narrator(resume_text, jd, persona_assessment, writing_dna, company
     # Jargon Blacklist: The "AI-Slop" filter for professional humans
     blacklist = ["synergy", "spearheaded", "passionate", "leverage", "meticulous", "deep-dive"]
 
+    # Ensure this matches your function signature parameters
     prompt = f"""
     ACT AS: A Career Narrative Architect.
-    STYLE: Professional but Blunt. No 'AI-slop'.
+    STYLE: Professional but Blunt.
     WRITING DNA: {writing_dna}
     
     CONTEXT:
     - Target Organization: {company_name}
-    - User's Specific Strengths/Persona: {persona_assessment}
+    - Seniority Level: {job_level}  # <-- DYNAMIC INJECTION
+    - User's Specific Persona/Fit: {persona_assessment}
     - User's Experience Data: {resume_text[:2000]}
     - Job Requirements: {jd[:1000]}
 
     TASK:
-    1. THE HOOK: Start with a quantifiable achievement or high-value technical skill from the user's resume that directly addresses a pain point in the JD. No generic openings.
-    2. THE DYNAMIC BRIDGE: Use the 'User's Specific Strengths' to explain how their background—whatever it may be—provides a unique advantage (the 'Value Anchor') for this specific role.
-    3. THE 'WORKHORSE' RULE: Use direct, punchy language. Replace corporate jargon with practical, action-oriented vocabulary (e.g., 'handled', 'solved', 'built').
-    4. VETO: Strictly avoid these words: {', '.join(blacklist)}.
-
-    OUTPUT FORMAT (STRICT JSON ONLY):
-    {{
-      "cover_letter_narrative": "string",
-      "voice_audit": "Critique of how the narrative matches the requested style",
-      "value_anchor": "The specific link identified between the user's past and this role"
-    }}
+    - If {job_level} is 'Intern': Focus on technical grit and reliability.
+    - If {job_level} is 'Senior': Focus on architecture and mentoring.
+    - Reference the {company_name} mission specifically.
     """
+
+
 
     try:
         response = client.chat.completions.create(
