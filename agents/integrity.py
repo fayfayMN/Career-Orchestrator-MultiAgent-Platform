@@ -99,3 +99,29 @@ def evaluate_interview_voice(question, transcribed_answer, api_key):
         return json.loads(response.choices[0].message.content)
     except Exception as e:
         return {"error": str(e)}
+
+# Add evaluate_and_reorg_answer
+def evaluate_and_reorg_answer(question, answer, api_key):
+    """
+    Consolidated Layer 4/5: The Blunt Coach.
+    Evaluates and Re-architects answers using the STAR method.
+    """
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    
+    prompt = f"""
+    QUESTION: {question}
+    USER_RAW_ANSWER: {answer}
+    
+    TASK:
+    1. BLUNT FEEDBACK: Grade 1-10 on technical grit and clarity.
+    2. THE REORG (STAR METHOD): Rewrite their answer into a high-impact narrative.
+       - Focus on the 3.9 GPA, #1 AGENT.AI win, and 99.9% USPS accuracy [cite: 2026-03-04, 2026-01-09, 2026-03-23].
+       - Use 'Workhorse' verbs (Built, Cleaned, Architected).
+    """
+    
+    response = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[{"role": "system", "content": "You are a blunt Interview Evaluator. No fluff."},
+                  {"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content
