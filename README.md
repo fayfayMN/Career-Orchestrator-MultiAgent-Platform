@@ -2,6 +2,7 @@
 
 **Bridging the gap between high-grit talent and automated hiring filters through dual-track agentic reasoning.**
 
+
 ---
 
 ### 📌 The Mission
@@ -42,6 +43,8 @@ Unlike standard LLM wrappers, this system utilizes **Semantic Intent Filtering**
 
 ### 📂 Quick Start
 
+[https://career-orchestrator-multiagent-platformgit-nyoayktbvkpcsbgamg7.streamlit.app/](url)
+
 ```bash
 # 1. Clone the repository
 git clone [https://github.com/fayfayMN/Career-Orchestrator-MultiAgent-Platform.git](https://github.com/fayfayMN/Career-Orchestrator-MultiAgent-Platform.git)
@@ -51,3 +54,26 @@ pip install -r requirements.txt
 
 # 3. Launch the Orchestrator
 streamlit run app.py
+
+## 🛠️ Development Log & Optimization Journal
+
+This section tracks the architectural evolution of the Career Orchestrator, highlighting key technical challenges and engineering pivots.
+
+### **Log 01: From Sequential to Parallel (The Latency Sprint)**
+* **Problem:** The initial 8-agent pipeline ran sequentially, causing a 45+ second wait time that degraded user experience.
+* **Solution:** Refactored the orchestration layer using Python's `asyncio`. By implementing `asyncio.gather`, independent agents (e.g., **Tutor** and **Storyteller**) now fire simultaneously.
+* **Result:** Reduced end-to-end execution time by **~60%**, achieving sub-15-second response times for the full analysis package.
+
+### **Log 02: Binary Stream Ingestion (The "No-Paste" Pivot)**
+* **Problem:** Manual "Copy-Paste" of resumes introduced data truncation and formatting errors, weakening the **Auditor's** accuracy.
+* **Solution:** Integrated `pdfplumber` and `python-docx` to handle raw binary file streams. The system now programmatically parses uploaded files to ensure 100% data fidelity.
+* **Technical Win:** Implemented error-handling for non-standard PDF encodings, ensuring a robust ingestion layer for diverse user inputs.
+
+### **Log 03: Context-Aware Persistence & Data Provenance**
+* **Problem:** AI-generated artifacts lacked traceability; users couldn't see the specific JD constraints that triggered certain resume keywords.
+* **Solution:** Re-engineered the `.docx` export function to inject **Company Name** and **Target JD Metadata** as a "Reference Layer" at the top of every report.
+* **Benefit:** Achieved **Data Provenance**, allowing candidates to audit why the **Resume Pro** agent chose specific engineering keywords (like FastAPI or Azure) for a given role.
+
+### **Log 04: Handling API Connection Instability**
+* **Problem:** High-traffic periods on the DeepSeek API caused frequent `APIConnectionError` crashes during the Audit phase. 
+* **Solution:** Implemented custom **Exception Handling** and **Exponential Backoff** logic. The app now provides clear user feedback and retries the connection rather than crashing.
