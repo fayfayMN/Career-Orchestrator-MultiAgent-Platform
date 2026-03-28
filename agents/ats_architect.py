@@ -4,7 +4,12 @@ from openai import OpenAI
 
 #  Add 'gaps' to the signature
 # agents/ats_architect.py
+
 def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writing_dna):
+    # This matches the 7-item call from app.py
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    
+   
    
     """
     Dynamic Layer 2: The Impact-First Resume Rewriter.
