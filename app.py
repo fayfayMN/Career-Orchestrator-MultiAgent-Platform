@@ -160,13 +160,15 @@ if st.session_state.final_results:
     with t2:
         st.subheader("🎯 ATS-Optimized Impact Bullets")
         
-        # 1. Safely pull the dynamic data
+        # Get the 'ats' dictionary from the results
         ats_data = res.get('ats', {})
         
         if ats_data:
-            st.success(f"**Recruiter Scan Verdict:** {ats_data.get('recruiter_scan_verdict', 'No verdict generated.')}")
-            
+            # Match these keys EXACTLY to the agent's prompt
+            verdict = ats_data.get('recruiter_scan_verdict', "No verdict generated.")
             keywords = ats_data.get('ats_keywords_hit', [])
+            
+            st.success(f"**Recruiter Scan Verdict:** {verdict}")
             st.write(f"**Keywords Infiltrated:** {', '.join(keywords) if keywords else 'None identified.'}")
             
             st.divider()
