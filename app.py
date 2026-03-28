@@ -13,7 +13,7 @@ if root_path not in sys.path:
     sys.path.insert(0, root_path)
 
 # --- 2. PAGE CONFIGURATION ---
-st.set_page_config(page_title="Job-Ready v2.0", layout="wide")
+st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")
 
 # --- 3. IMPORT GENERALIZED AGENTS ---
 try:
@@ -39,7 +39,9 @@ def generate_docx_report(company, level, jd, results):
     doc.add_heading("Target Role Context", level=1)
     doc.add_paragraph(f"**Target Company:** {company}")
     doc.add_paragraph(f"**Target Role:** {level}")
-    
+    doc.add_heading("Job Description Reference", level=2)
+    doc.add_paragraph(jd)
+
     strat = results.get('strategy', {})
     doc.add_heading("Layer 1: Strategic Audit", level=1)
     doc.add_paragraph(f"Match Score: {strat.get('match_score', 'N/A')}%")
@@ -103,10 +105,10 @@ with st.sidebar:
         st.success("✅ Resume Memory Locked")
 
 # --- 7. MAIN UI ---
-st.title("🚀 Job-Ready: The No-Fluff Career Engine")
+st.title("🚀 Career Orchestrator: Multi-Agent Platform")
 c1, c2 = st.columns(2)
 with c1:
-    company_name = st.text_input("Target Company", value="Johnson Brothers")
+    company_name = st.text_input("Target Company", value="Quva Pharma")
     job_level = st.selectbox("Job Level", ["Intern", "Junior", "Senior", "Lead"]) 
 with c2:
     jd_input = st.text_area("Target Job Description", height=150)
@@ -122,14 +124,31 @@ if st.button("🔥 Run Full Optimization"):
                 strat = run_strategy_architect(st.session_state.resume_text, jd_input, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna_choice)
                 
                 st.write("🤖 Phase 2: ATS Architect...")
-                ats = run_ats_architect(st.session_state.resume_text, jd_input, job_level, company_name, strat.get('missing_gaps', []), api_key, writing_dna_choice)
+                # FIXED ORDER: resume_text, jd, job_level, company, gaps, api_key, writing_dna
+                ats = run_ats_architect(
+                    st.session_state.resume_text,
+                    jd_input,
+                    job_level,
+                    company_name,
+                    strat.get('missing_gaps', []),
+                    api_key,
+                    writing_dna_choice
+                )
                 
                 st.write("✍️ Phase 3: Human Narrator...")
                 narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat.get('persona_assessment', ''), writing_dna_choice, company_name, job_level, api_key, style_text)
                 
                 st.write("🛡️ Phase 4: Integrity Guardian...")
-                integrity = run_integrity_guardian(st.session_state.resume_text, ats, narrative, strat.get('missing_gaps', []), api_key, job_level)
-                
+               
+                integrity = run_integrity_guardian(
+                    
+                    st.session_state.resume_text, 
+                    ats, 
+                    narrative, 
+                    strat.get('missing_gaps', []), 
+                    api_key, 
+                    job_level # This makes the interview questions level-appropriate
+                )
                 st.session_state.final_results = {"strategy": strat, "ats": ats, "narrative": narrative, "integrity": integrity}
                 status.update(label="✅ Optimization Complete!", state="complete")
             st.rerun() 
@@ -144,10 +163,9 @@ if st.session_state.final_results:
     st.subheader("👤 Candidate Persona & Management Roadmap")
     col_narr, col_risk = st.columns(2)
     with col_narr:
-        st.info(f"**Persona Fit:** {res['strategy'].get('persona_assessment', 'Standard Grit Pattern')}")
+        st.info(f"**Persona Fit:** {res['strategy'].get('persona_assessment', 'Standard')}")
     with col_risk:
-        # FIXED KEY: Changed from 'internal_placement_strategy' to 'value_anchor' to match your Narrator Agent
-        st.warning(f"**Strategy:** {res['narrative'].get('value_anchor', 'Transferable Logic Bridge Enabled')}")
+        st.warning(res['narrative'].get('internal_placement_strategy', "Internal Strategy processing..."))
 
     t1, t2, t3, t4 = st.tabs(["📊 Strategy", "📄 ATS Bullets", "✉️ Formal Cover Letter", "🎙️ Voice Practice"])
     
@@ -156,23 +174,33 @@ if st.session_state.final_results:
         st.markdown(res['strategy'].get('learning_syllabus', ''))
     
     with t2:
+        
         st.subheader("📄 Tailored Technical Resume")
         ats_data = res.get('ats', {})
+        
         if ats_data:
-            st.markdown("### Feifei Li") # Anchored to your identity
+            # Professional Header
+            st.markdown(f"### {st.session_state.get('user_name', 'Feifei Li')}")
             st.caption("Data Science | Operational Excellence | Data Integrity Specialist")
             st.divider()
-
+    
+            # Iterate through the FULL reconstruction
             for item in ats_data.get('optimized_experience', []):
                 role = item.get('Role', 'Project')
                 stack = item.get('Tech_Stack', 'Technical Stack')
+                
+                # This line replicates your "Loan Approval | Python" header exactly
                 st.markdown(f"#### {role} | {stack}")
+                
+                # Display the 4 STAR bullets
                 for bullet in item.get('Bullets', []):
+                    # Clean up bullet icons for a professional look
                     clean_bullet = bullet.lstrip('• ').lstrip('✅ ')
                     st.write(f"• {clean_bullet}")
-                st.write("") 
+                
+                st.write("") # Spacer between roles
         else:
-            st.error("No experience data generated.")
+            st.error("No experience data generated. Check agent logic.")
 
     with t3:
         st.subheader("✉️ Formal Persona-Driven Cover Letter")
@@ -183,54 +211,26 @@ if st.session_state.final_results:
     with t4:
         st.subheader("🎙️ Interactive Technical Drill")
         drills = res.get('integrity', {}).get('interview_drills', [])
-        
         if drills:
-            # 1. Initialize session state for the transcript
-            if 'transcript' not in st.session_state:
-                st.session_state.transcript = ""
-
             drill_map = {d['question']: d['strategic_hint'] for d in drills}
             q_selected = st.selectbox("Select Drill:", list(drill_map.keys()))
-            
             st.info(f"**Challenge:** {q_selected}")
             with st.expander("💡 View Strategic Hint (Tailored STAR)"):
                 st.write(drill_map[q_selected])
-
             if st.button("📢 Hear Question"):
                 tts = gTTS(text=q_selected, lang='en')
                 audio_fp = BytesIO()
                 tts.write_to_fp(audio_fp)
                 st.audio(audio_fp.getvalue(), format='audio/mp3')
-
             st.divider()
             st.write("Record your answer:")
-            
-            # 2. Key the recorder to the specific question to prevent data bleeding
-            audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key=f'mic_{q_selected}')
-            
+            audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
             if audio_data:
-                # In a real-world scenario, you would call Whisper API here to get the text.
-                # For this "Truth & Precision" sprint, we use a status indicator to avoid TypeErrors.
-                st.session_state.transcript = "User provided an audio response. [Analysis Pending Transcript]"
                 st.audio(audio_data['bytes'])
-
-            # 3. Grading Logic
-            if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
-                # VALIDATION: Ensure the transcript is a valid string before calling the agent
-                if st.session_state.transcript:
+                if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
                     with st.spinner("Analyzing your grit..."):
-                        feedback = evaluate_and_reorg_answer(
-                            question=q_selected, 
-                            user_transcript=str(st.session_state.transcript), # Force string type
-                            api_key=api_key
-                        )
+                        feedback = evaluate_and_reorg_answer(q_selected, "Audio response captured.", api_key)
                         st.markdown("### 📝 Coach's Blunt Feedback")
                         st.warning(feedback)
-                else:
-                    st.error("❌ Please record an answer first.")
         else:
             st.warning("No drills generated.")
-
-
-     
-       
