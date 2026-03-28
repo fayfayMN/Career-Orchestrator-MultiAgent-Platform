@@ -83,8 +83,9 @@ with st.sidebar:
 st.title("🚀 Career Orchestrator: Multi-Agent Platform")
 c1, c2 = st.columns(2)
 with c1:
-    company_name = st.text_input("Target Company", value="Life Time")
-    job_level = st.selectbox("Job Level", ["Intern", "Junior", "Senior", "Lead"])
+    company_name = st.text_input("Target Company", value="Quva Pharma")
+    # FIX: Ensure this is assigned to a variable accessible globally in the script
+    job_level = st.selectbox("Job Level", ["Intern", "Junior", "Senior", "Lead"]) 
 with c2:
     jd_input = st.text_area("Target Job Description", height=150)
 
