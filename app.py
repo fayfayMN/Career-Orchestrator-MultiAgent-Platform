@@ -215,11 +215,16 @@ if st.session_state.final_results:
             if st.session_state.last_recording:
                 st.audio(st.session_state.last_recording)
                 
-                if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
-                    with st.spinner("Analyzing your grit..."):
-                        # Pass the stored recording to your evaluator
-                        feedback = evaluate_and_reorg_answer(q_selected, "Audio response provided.", api_key)
-                        st.markdown("### 📝 Coach's Blunt Feedback")
-                        st.warning(feedback)
+            # --- Inside Tab 4 (Voice Practice) ---
+            if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
+                with st.spinner("Analyzing your grit..."):
+                    # MANDATORY: Pass the 'q_selected' variable so the AI knows the context
+                    feedback = evaluate_and_reorg_answer(
+                        question=q_selected, 
+                        user_transcript=user_answer_text, # Ensure this is your recorded text
+                        api_key=api_key
+                    )
+                    st.markdown("### 📝 Coach's Blunt Feedback")
+                    st.warning(feedback)
         else:
             st.warning("No drills generated.")
