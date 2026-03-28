@@ -3,4 +3,4 @@ openai
 pdfplumber
 python-docx
 gTTS
-st-audiorec
+streamlit-audio-recorder
