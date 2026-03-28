@@ -20,32 +20,32 @@ def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writin
     verbs = "Analyzed, Modeled, Evaluated, Engineered, Built, Trained, Optimized, Deployed, Designed, Automated"
 
     prompt = f"""
-        ACT AS: A Senior Technical Resume Architect.
-        MANDATE: Perform a FULL RECONSTRUCTION of the candidate's history. DO NOT skip any roles.
-        
-        SOURCE DATA: {resume_text}
-        TARGET JD: {jd}
+    ACT AS: A Senior Technical Resume Architect.
+    MANDATE: Perform a COMPLETE RECONSTRUCTION of the candidate's history.
     
-        TASK:
-        1. EXTRACT ALL: Identify every Project, Role, and Volunteer position (USPS, AGENT.AI, MN Tech for Success, etc.) [cite: 2026-03-23, 2026-03-26, 2026-01-09].
-        2. PHARMA-PIVOT: Tailor EVERY entry to highlight 'Data Integrity', 'Precision', and 'Standard Operating Procedures' (SOPs) for {company}. [cite: 2026-03-28]
-        3. THE FORMULA: 1 Title | Tech Stack line + 4 STAR Bullets (Problem, Method, Result, Impact).
-        4. METRIC ENFORCEMENT: You MUST include the 99.9% USPS accuracy, 70k survey rows, and 1st Place wins. [cite: 2026-03-23, 2026-03-28, 2026-01-09]
-    
-        OUTPUT FORMAT (STRICT JSON ONLY):
+    INSTRUCTIONS:
+    1. DISCOVERY: Identify EVERY distinct work experience, project, and volunteer block in: {resume_text}. Do not truncate.
+    2. THE PIVOT: Tailor EVERY block to the needs of {company} ({job_level}).
+       - If {company} values 'Data Integrity', find evidence of precision in every role. [cite: 2026-03-28]
+       - If they value 'Automation', find where the candidate improved workflows.
+    3. THE FORMULA (FOR ALL): 
+       - Header: **Role Title** | [Tech Stack/Tools]
+       - 4 Bullets: Problem -> Technical Method -> Result -> Business/Safety Impact.
+    4. METRIC EXTRACTION: Search the resume for every possible number (%, $, row counts, rankings) and embed them into the Result bullets.
+
+    OUTPUT FORMAT (STRICT JSON ONLY):
+    {{
+      "optimized_experience": [
         {{
-          "optimized_experience": [
-            {{
-              "Role": "Official Job Title or Project Name",
-              "Tech_Stack": "Relevant tools used",
-              "Bullets": ["• [STAR Bullet 1]", "• [STAR Bullet 2]", "• [STAR Bullet 3]", "• [STAR Bullet 4]"]
-            }}
-          ],
-          "recruiter_scan_verdict": "...",
-          "ats_keywords_hit": []
+          "Role": "Title found in resume",
+          "Tech_Stack": "Tools identified for this specific block",
+          "Bullets": ["• [Bullet 1]", "• [Bullet 2]", "• [Bullet 3]", "• [Bullet 4]"]
         }}
-        """
-    
+      ],
+      "recruiter_scan_verdict": "Blunt 1-sentence assessment of candidate's grit and technical fit.",
+      "ats_keywords_hit": ["List of keywords from the JD found and included"]
+    }}
+    """
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
