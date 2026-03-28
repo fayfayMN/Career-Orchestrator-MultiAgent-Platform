@@ -1,3 +1,13 @@
+# --- 2. IMPORT GENERALIZED AGENTS ---
+try:
+    from agents.strategy_arch import run_strategy_architect
+    from agents.ats_architect import run_ats_architect  # <--- MAKE SURE THIS LINE IS HERE
+    from agents.human_narrator import run_human_narrator
+    from agents.integrity import run_integrity_guardian
+except ImportError as e:
+    st.error(f"⚠️ Import Error: {e}. Ensure agents/__init__.py exists.")
+
+
 import streamlit as st
 import pdfplumber
 import sys
