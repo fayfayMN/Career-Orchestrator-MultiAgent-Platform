@@ -144,9 +144,6 @@ if st.session_state.final_results:
             for bullet in item.get('Bullets', []):
                 st.write(f"✅ {bullet}")
             st.write("") # Spacer
-
-    with t3:
-        # ... (Your existing Voice Practice code)
     
     with t3:
         st.subheader("Interactive Interview Drill")
