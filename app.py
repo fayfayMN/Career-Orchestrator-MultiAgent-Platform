@@ -188,6 +188,22 @@ if st.session_state.final_results:
                 
                 st.divider()
                 
-                # Recording logic remains here...
-
-
+                # 2. RECORDING INTERFACE
+                st.write("Record your answer:")
+                audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
+                
+                if audio_data:
+                    st.audio(audio_data['bytes'])
+                    
+                    # 3. FEEDBACK & REORG LOOP
+                    if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
+                        with st.spinner("Analyzing your grit..."):
+                            # Calling the consolidated function from agents/integrity.py
+                            feedback = evaluate_and_reorg_answer(q_selected, "Audio response captured.", api_key)
+                            
+                            st.markdown("### 📝 Coach's Blunt Feedback")
+                            st.warning(feedback)
+                            
+                            st.success("✅ Review the 'Perfect STAR Answer' above to calibrate your next attempt.")
+    
+    
