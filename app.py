@@ -8,19 +8,18 @@ from gtts import gTTS
 from st_audiorec import st_audiorec
 
 # --- 1. PATH RESILIENCE (Log 05) ---
-# This ensures the 'agents' folder is visible to the Streamlit Cloud environment
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
-# --- 2. IMPORT CONSOLIDATED AGENTS ---
+# --- 2. IMPORT GENERALIZED AGENTS ---
 try:
     from agents.strategy_arch import run_strategy_architect
     from agents.ats_architect import run_ats_architect
     from agents.human_narrator import run_human_narrator
     from agents.integrity import run_integrity_guardian
 except ImportError as e:
-    st.error(f"⚠️ Import Error: {e}. Check if agents/__init__.py exists on GitHub.")
+    st.error(f"⚠️ Import Error: {e}. Ensure agents/__init__.py exists.")
 
 # --- 3. CONFIGURATION & STATE ---
 st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")
@@ -33,37 +32,49 @@ if 'final_results' not in st.session_state:
 # --- 4. HELPERS: DOWNLOAD ENGINE (Log 03) ---
 def generate_docx_report(company, level, jd, results):
     doc = Document()
-    doc.add_heading(f"Career Strategy Report: {company}", 0)
+    doc.add_heading(f"Strategy Report: {company}", 0)
     
-    doc.add_heading("Target Context & JD Metadata", level=1)
-    doc.add_paragraph(f"Organization: {company} | Level: {level}")
-    doc.add_paragraph(f"Source JD snippet: {jd[:300]}...")
-
+    # Metadata
+    doc.add_heading("Context & JD Metadata", level=1)
+    doc.add_paragraph(f"Target: {company} | Level: {level}")
+    
+    # Layer 1 & 2 Data
+    strat = results.get('strategy', {})
     doc.add_heading("Layer 1: Strategic Audit", level=1)
-    doc.add_paragraph(f"Match Score: {results['strategy'].get('match_score', 'N/A')}%")
-    doc.add_paragraph(results['strategy'].get('learning_syllabus', ''))
+    doc.add_paragraph(f"Match Score: {strat.get('match_score', 'N/A')}%")
+    doc.add_paragraph(strat.get('learning_syllabus', ''))
 
     doc.add_heading("Layer 2: Optimized ATS Bullets", level=1)
-    for exp in results['ats'].get('ats_experience_bullets', []):
-        doc.add_heading(exp.get('Company', 'Experience'), level=2)
+    ats = results.get('ats', {})
+    for exp in ats.get('optimized_bullets', []):
+        doc.add_heading(exp.get('Role', 'Experience'), level=2)
         for bullet in exp.get('Bullets', []):
             doc.add_paragraph(bullet, style='List Bullet')
 
-    doc.add_heading("Layer 3: Human-Grit Narrative", level=1)
-    doc.add_paragraph(results['narrative'].get('cover_letter_narrative', ''))
+    # Layer 3 Data
+    doc.add_heading("Layer 3: Human Narrative", level=1)
+    doc.add_paragraph(results.get('narrative', {}).get('cover_letter_narrative', ''))
 
     bio = BytesIO()
     doc.save(bio)
     return bio.getvalue()
 
-# --- 5. SIDEBAR: INGESTION (Log 02) ---
+# --- 5. SIDEBAR: PERSONA DISCOVERY (The Pivot) ---
 with st.sidebar:
-    st.header("📂 Ingestion Layer")
+    st.header("👤 Persona Discovery")
     api_key = st.text_input("DeepSeek API Key", type="password")
-    uploaded_file = st.file_uploader("Upload Master Resume", type=["pdf", "docx"])
+    
+    # Generalized inputs for all job seekers
+    user_strengths = st.text_area("Your Top 3 Strengths", placeholder="e.g., Reliability, Python, Problem Solving")
+    user_weaknesses = st.text_area("Gaps/Weaknesses", placeholder="e.g., Public speaking, No SQL experience")
+    writing_dna = st.selectbox("Writing Style", ["Blunt & Gritty", "Professional", "Academic"])
+    
+    st.divider()
+    st.header("📂 Ingestion")
+    uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
 
-    if uploaded_file and st.button("Parse Binary Resume"):
-        with st.spinner("Parsing..."):
+    if uploaded_file and st.button("Parse Resume"):
+        with st.spinner("Parsing binary stream..."):
             if uploaded_file.type == "application/pdf":
                 with pdfplumber.open(uploaded_file) as pdf:
                     st.session_state.resume_text = "\n".join([p.extract_text() for p in pdf.pages if p.extract_text()])
@@ -72,7 +83,7 @@ with st.sidebar:
                 st.session_state.resume_text = "\n".join([p.text for p in doc.paragraphs])
         st.success("✅ Resume Loaded")
 
-# --- 6. MAIN UI: CONTEXT (Log 03) ---
+# --- 6. MAIN UI: CONTEXT ---
 st.title("🚀 Career Orchestrator: Multi-Agent Platform")
 c1, c2 = st.columns(2)
 
@@ -82,56 +93,59 @@ with c1:
 with c2:
     jd_input = st.text_area("Target Job Description", height=150)
 
-# --- 7. ORCHESTRATION (Log 01 & 06) ---
+# --- 7. GENERALIZED ORCHESTRATION ---
 if st.button("🔥 Run Full Optimization") and st.session_state.resume_text:
     if not api_key:
-        st.warning("Please enter an API Key.")
+        st.warning("Enter your API Key in the sidebar.")
     else:
-        with st.status("Orchestrating Consolidated Agents...") as status:
-            st.write("Step 1: Auditing Match & Building Syllabus...")
-            strat = run_strategy_architect(st.session_state.resume_text, jd_input, job_level, company_name, api_key)
+        with st.status("Orchestrating Agents...") as status:
+            # Phase 1: Strategy & Persona Assessment
+            st.write("Phase 1: Analyzing your Persona...")
+            strat = run_strategy_architect(st.session_state.resume_text, jd_input, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna)
             
-            st.write("Step 2: Re-Architecting Resume & Human Narrative...")
-            ats = run_ats_architect(st.session_state.resume_text, strat['missing_gaps'], jd_input, strat['audit_summary'], job_level, company_name, api_key)
-            narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat['audit_summary'], "Blunt/Grit", company_name, api_key)
+            # Phase 2: ATS keyword mapping
+            st.write("Phase 2: Optimizing Keywords...")
+            ats = run_ats_architect(st.session_state.resume_text, strat.get('missing_gaps', []), jd_input, strat.get('persona_assessment', ''), job_level, company_name, api_key)
             
-            st.write("Step 3: Fact-Checking & Interview Prep...")
-            integrity = run_integrity_guardian(st.session_state.resume_text, ats, narrative, strat['missing_gaps'], api_key)
+            # Phase 3: Human Voice Narrative
+            st.write("Phase 3: Crafting Narrative...")
+            narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat.get('persona_assessment', 'Technical Professional'), writing_dna, company_name, api_key)
             
-            st.session_state.final_results = {
-                "strategy": strat, "ats": ats, "narrative": narrative, "integrity": integrity
-            }
+            # Phase 4: Final Fact-Check
+            st.write("Phase 4: Integrity Audit...")
+            integrity = run_integrity_guardian(st.session_state.resume_text, ats, narrative, strat.get('missing_gaps', []), api_key)
+            
+            st.session_state.final_results = {"strategy": strat, "ats": ats, "narrative": narrative, "integrity": integrity}
             status.update(label="✅ Optimization Complete!", state="complete")
 
-# --- 8. RESULTS & INTERACTION (Log 07) ---
+# --- 8. RESULTS DISPLAY ---
 if st.session_state.final_results:
     res = st.session_state.final_results
     st.divider()
     
+    # Download Button (Contextual Naming)
     report_bytes = generate_docx_report(company_name, job_level, jd_input, res)
-    st.download_button(
-        label=f"📥 Download {company_name} Strategy Report",
-        data=report_bytes,
-        file_name=f"{company_name}_Strategy_Report.docx"
-    )
+    st.download_button(label=f"📥 Download {company_name} Strategy Report", data=report_bytes, file_name=f"{company_name}_Report.docx")
 
     t1, t2, t3 = st.tabs(["📊 Strategy", "📄 ATS Resume", "🎙️ Voice Practice"])
     
     with t1:
-        st.metric("Match Score", f"{res['strategy'].get('match_score', '0')}%")
-        st.markdown(res['strategy'].get('learning_syllabus', 'No syllabus generated.'))
+        st.metric("Match Score", f"{res['strategy'].get('match_score', 0)}%")
+        st.markdown(f"**Persona:** {res['strategy'].get('persona_assessment', 'N/A')}")
+        st.markdown(res['strategy'].get('learning_syllabus', ''))
         
     with t2:
         st.json(res['ats']) 
         
     with t3:
-        st.subheader("Interactive Technical Grill")
+        st.subheader("Interactive Interview Grill")
         questions = res['integrity'].get('interview_questions', {})
         if questions:
-            q_key = st.selectbox("Select Drill:", list(questions.keys()))
+            q_list = list(questions.values())
+            q_selected = st.selectbox("Select Drill:", q_list)
             
             if st.button("📢 Hear Question"):
-                tts = gTTS(text=questions[q_key], lang='en')
+                tts = gTTS(text=q_selected, lang='en')
                 audio_fp = BytesIO()
                 tts.write_to_fp(audio_fp)
                 st.audio(audio_fp.getvalue(), format='audio/mp3')
@@ -139,6 +153,4 @@ if st.session_state.final_results:
             st.write("Record your STAR-method answer:")
             wav_audio_data = st_audiorec()
             if wav_audio_data:
-                st.info("Record received. Analyzing for STAR-method metrics...")
-        else:
-            st.write("No interview questions generated.")
+                st.info("Record received. Analyzing...")
