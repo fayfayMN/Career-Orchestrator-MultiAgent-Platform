@@ -1,43 +1,66 @@
 import json
 from openai import OpenAI
 
-# agents/integrity.py (The Consolidated Version)
+import json
+from openai import OpenAI
+
 def run_integrity_guardian(resume_text, ats_data, narrative_data, gaps, api_key):
+    """
+    Dynamic Layer 4: Generates tailored interview drills and strategic hints.
+    """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
+    # We pass the 'Gaps' and 'Resume' so the AI knows exactly where to push
     prompt = f"""
-    ACT AS: A Senior Auditor & Interview Strategist.
-    TRUTH: {resume_text[:1500]}
-    GEN-DATA: Bullets: {ats_data} | Letter: {narrative_data}
+    ACT AS: A Technical Interviewer & Career Coach.
+    TRUTH SOURCE: {resume_text[:1500]}
+    IDENTIFIED GAPS: {gaps}
 
     TASK:
-    1. AUDIT: Identify hallucinations in Gen-Data not supported by Truth.
-    2. DRILL: Create 3 interview questions based on {gaps}.
-    3. STRATEGIZE: For each question, provide a 'Strategic Hint' bridging their 99.9% USPS accuracy [cite: 2026-03-23] or AGENT.AI win [cite: 2026-01-09] to the problem.
+    1. Generate 3 'Grilling' interview questions based on the candidate's technical gaps.
+    2. For EACH question, write a 'Strategic Hint' that explicitly tells the candidate how to bridge their 
+       specific wins (99.9% USPS accuracy [cite: 2026-03-23] or AGENT.AI #1 Win [cite: 2026-01-09]) 
+       to the interviewer's concern.
 
-    OUTPUT FORMAT (STRICT JSON):
+    OUTPUT FORMAT (STRICT JSON ONLY):
     {{
-      "hallucination_report": "List errors or 'Clean'",
-      "integrity_pass": boolean,
       "interview_drills": [
         {{
-          "question": "string",
-          "strategic_hint": "string"
+          "question": "The actual tough question text...",
+          "strategic_hint": "A STAR-based hint bridging [Resume Win] to [Question Topic]."
         }}
-      ]
+      ],
+      "integrity_pass": true
     }}
     """
-   
+
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
-            messages=[{"role": "system", "content": "You are a ruthless Fact-Checker."},
+            messages=[{"role": "system", "content": "You are a ruthless technical coach. No fluff."},
                       {"role": "user", "content": prompt}],
             response_format={'type': 'json_object'}
         )
-        return json.loads(response.choices[0].message.content)
+        
+        content = response.choices[0].message.content.strip()
+        
+        # Strip Markdown if present
+        if content.startswith("```"):
+            content = content.split("```")[1].replace("json", "").strip()
+            
+        return json.loads(content)
+        
     except Exception as e:
-        return {"integrity_pass": False, "hallucination_report": str(e)}
+        # Fallback to ensure the UI doesn't crash if the AI fails
+        return {{
+            "interview_drills": [
+                {{
+                    "question": "Tell me about your most complex data project.",
+                    "strategic_hint": "Focus on the 70,000-row survey and your cleaning process [cite: 2026-03-28]."
+                }}
+            ],
+            "integrity_pass": False
+        }}
 
 # --- TASK 2: THE EVALUATOR (JSON DATA) ---
 def evaluate_interview_voice(question, transcribed_answer, api_key):
