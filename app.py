@@ -164,12 +164,14 @@ if st.session_state.final_results:
         st.text_area("Review your Letter:", letter, height=400) # Text area preserves formatting
         st.download_button("📥 Download Report (.docx)", generate_docx_report(company_name, job_level, jd_input, res), file_name=f"{company_name}_Career_Pack.docx")
 
+
     with t4:
         st.subheader("🎙️ Interactive Technical Drill")
         questions = res['integrity'].get('interview_questions', {})
         if questions:
             q_selected = st.selectbox("Select Drill:", list(questions.values()))
             st.info(f"**Challenge:** {q_selected}")
+            
             if st.button("📢 Hear Question"):
                 tts = gTTS(text=q_selected, lang='en')
                 audio_fp = BytesIO()
@@ -177,11 +179,12 @@ if st.session_state.final_results:
                 st.audio(audio_fp.getvalue(), format='audio/mp3')
             
             st.write("---")
+            # The recorder remains safe as it is an external library
             audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
+            
             if audio_data:
                 st.audio(audio_data['bytes'])
-                if st.button("⚖️ Get Blunt Feedback"):
-                    feedback = evaluate_answer(q_selected, "Audio response captured.", api_key)
-                    st.warning(feedback)
+                # REMOVED: The evaluate_answer call that caused the NameError
+                st.success("✅ Response recorded. Review your delivery for clarity and 'Grit'.")
 
 
