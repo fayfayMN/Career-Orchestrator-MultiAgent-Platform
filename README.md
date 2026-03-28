@@ -95,4 +95,9 @@ This section tracks the architectural evolution of the Career Orchestrator, high
     * **Layer 3 (The Human Narrator):** Combines **Voice Filter** and **Composer** to draft the cover letter directly in a "Human-Grit" tone.
     * **Layer 4 (The Integrity Guardian):** Fuses **Fact-Checker** and **Coach** to validate data fidelity and generate interview prep in one verification cycle.
 * **Impact:** Reduced API token consumption by **~40%** and simplified the `asyncio` parallelization logic, resulting in a more maintainable codebase for the **Life Time** digital-first environment.
+
+### **Log 07: Multimodal Interaction & The 'STAR' Evaluator**
+* **Problem:** Static text-based interview prep lacks the pressure of a real technical interview.
+* **Solution:** Integrated **Voice Ingestion** and **TTS Synthesis**. Layer 4 now "speaks" questions and listens to user responses via binary audio streams.
+* **Engineering Win:** Implemented a **STAR-Method Grading Engine** that performs semantic analysis on voice transcripts to ensure technical accuracy and "Human-Grit" alignment.
 <\details>
