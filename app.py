@@ -30,6 +30,8 @@ if 'resume_text' not in st.session_state:
     st.session_state.resume_text = ""
 if 'final_results' not in st.session_state:
     st.session_state.final_results = None
+if 'last_recording' not in st.session_state:
+    st.session_state.last_recording = None
 
 # --- 5. HELPERS: DOWNLOAD ENGINE ---
 def generate_docx_report(company, level, jd, results):
@@ -146,8 +148,9 @@ if st.session_state.final_results:
     with col_narr:
         st.info(f"**Persona Fit:** {res['strategy'].get('persona_assessment', 'Standard Grit Pattern')}")
     with col_risk:
-        # FIXED KEY: Changed from 'internal_placement_strategy' to 'value_anchor' to match your Narrator Agent
-        st.warning(f"**Strategy:** {res['narrative'].get('value_anchor', 'Transferable Logic Bridge Enabled')}")
+        # FIXED: Synchronized key with your Narrator Agent output (value_anchor)
+        strategy_text = res['narrative'].get('value_anchor', 'Transferable Logic Bridge Enabled')
+        st.warning(f"**Strategy:** {strategy_text}")
 
     t1, t2, t3, t4 = st.tabs(["📊 Strategy", "📄 ATS Bullets", "✉️ Formal Cover Letter", "🎙️ Voice Practice"])
     
@@ -159,7 +162,7 @@ if st.session_state.final_results:
         st.subheader("📄 Tailored Technical Resume")
         ats_data = res.get('ats', {})
         if ats_data:
-            st.markdown("### Feifei Li") # Anchored to your identity
+            st.markdown("### Feifei Li") 
             st.caption("Data Science | Operational Excellence | Data Integrity Specialist")
             st.divider()
 
@@ -186,13 +189,33 @@ if st.session_state.final_results:
         if drills:
             drill_map = {d['question']: d['strategic_hint'] for d in drills}
             q_selected = st.selectbox("Select Drill:", list(drill_map.keys()))
+            
             st.info(f"**Challenge:** {q_selected}")
             with st.expander("💡 View Strategic Hint (Tailored STAR)"):
                 st.write(drill_map[q_selected])
+            
             if st.button("📢 Hear Question"):
                 tts = gTTS(text=q_selected, lang='en')
                 audio_fp = BytesIO()
                 tts.write_to_fp(audio_fp)
                 st.audio(audio_fp.getvalue(), format='audio/mp3')
+            
             st.divider()
             st.write("Record your answer:")
+            
+            # Persistent key based on the question prevents reset during rerun
+            audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key=f'mic_{q_selected}')
+            
+            if audio_data:
+                st.session_state.last_recording = audio_data['bytes']
+            
+            if st.session_state.last_recording:
+                st.audio(st.session_state.last_recording)
+                if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
+                    with st.spinner("Analyzing your grit..."):
+                        # Passing context to avoid hallucinations
+                        feedback = evaluate_and_reorg_answer(q_selected, "Audio response provided.", api_key)
+                        st.markdown("### 📝 Coach's Blunt Feedback")
+                        st.warning(feedback)
+        else:
+            st.warning("No drills generated.")
