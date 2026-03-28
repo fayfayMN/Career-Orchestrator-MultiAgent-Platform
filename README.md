@@ -54,12 +54,12 @@ streamlit run app.py
 <details>
 <summary><h2>🛠️ Change Log & Optimization Journal (v1.0 ➔ v2.0)</h2></summary>
 
-v1.0: Core Logic & Multi-Agent Proof of Concept (01/2026)
+v1.0: Core Logic & Multi-Agent Proof of Concept 
 Feature: Established the 8-agent sequential pipeline for resume auditing and interview prep.
 
 Tech: Basic PDF parsing and text-based STAR method grading.
 
-v1.5: Performance & Multimodal Sprint (02/2026)
+v1.5: Performance & Multimodal Sprint (03/22/2026)
 Optimization: Implemented asyncio.gather to fire independent agents simultaneously, reducing latency by ~60%.
 
 Feature: Integrated gTTS (Text-to-Speech) for voice-over interview simulations.
