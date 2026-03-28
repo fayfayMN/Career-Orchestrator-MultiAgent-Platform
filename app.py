@@ -139,8 +139,16 @@ if st.button("🔥 Run Full Optimization"):
                 narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat.get('persona_assessment', ''), writing_dna_choice, company_name, job_level, api_key, style_text)
                 
                 st.write("🛡️ Phase 4: Integrity Guardian...")
-                integrity = run_integrity_guardian(st.session_state.resume_text, ats, narrative, strat.get('missing_gaps', []), api_key)
-                
+               
+                integrity = run_integrity_guardian(
+                    
+                    st.session_state.resume_text, 
+                    ats, 
+                    narrative, 
+                    strat.get('missing_gaps', []), 
+                    api_key, 
+                    job_level # This makes the interview questions level-appropriate
+                )
                 st.session_state.final_results = {"strategy": strat, "ats": ats, "narrative": narrative, "integrity": integrity}
                 status.update(label="✅ Optimization Complete!", state="complete")
             st.rerun() 
