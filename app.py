@@ -20,11 +20,7 @@ try:
     from agents.strategy_arch import run_strategy_architect
     from agents.ats_architect import run_ats_architect
     from agents.human_narrator import run_human_narrator
-    
-    # FIX: Import both the Guardian AND the Evaluator from the integrity agent
-    # this allows your 99.9% USPS accuracy stories to be graded [cite: 2026-03-23]
     from agents.integrity import run_integrity_guardian, evaluate_and_reorg_answer 
-    
 except Exception as e:
     st.error(f"🛑 Critical Load Failure: {e}")
     st.stop()
@@ -40,51 +36,36 @@ def generate_docx_report(company, level, jd, results):
     doc = Document()
     doc.add_heading(f"Strategy Report: {company}", 0)
     
-    # NEW: Targeted Role Metadata
     doc.add_heading("Target Role Context", level=1)
     doc.add_paragraph(f"**Target Company:** {company}")
     doc.add_paragraph(f"**Target Role:** {level}")
     doc.add_heading("Job Description Reference", level=2)
-    doc.add_paragraph(jd) # This stores the actual JD you pasted
+    doc.add_paragraph(jd)
 
-    # Layer 1: Strategy
     strat = results.get('strategy', {})
     doc.add_heading("Layer 1: Strategic Audit", level=1)
     doc.add_paragraph(f"Match Score: {strat.get('match_score', 'N/A')}%")
     doc.add_paragraph(f"Persona: {strat.get('persona_assessment', 'N/A')}")
     doc.add_paragraph(strat.get('learning_syllabus', ''))
     
-    # Layer 2: ATS (Updated to the new Dynamic Key)
-    st.write("🤖 Phase 2: ATS Architect...")
-    ats = run_ats_architect(
-        st.session_state.resume_text,  # 1. resume_text
-        jd_input,                      # 2. jd
-        job_level,                     # 3. job_level
-        company_name,                  # 4. company (Quva Pharma)
-        strat.get('missing_gaps', []), # 5. gaps
-        api_key,                       # 6. api_key (The ACTUAL Key)
-        writing_dna_choice             # 7. writing_dna
-    )
+    ats = results.get('ats', {})
     doc.add_heading("Layer 2: Optimized ATS Bullets", level=1)
     doc.add_paragraph(f"Recruiter Verdict: {ats.get('recruiter_scan_verdict', 'N/A')}")
-    
-    # Use the 'optimized_experience' key from your dynamic agent
     for exp in ats.get('optimized_experience', []):
         role_text = f"{exp.get('Role', 'Experience')} | {exp.get('Tech_Stack', '')}"
         doc.add_heading(role_text, level=2)
         for bullet in exp.get('Bullets', []):
             doc.add_paragraph(bullet, style='List Bullet')
     
-    # Layer 3: Formal Cover Letter
     doc.add_heading("Layer 3: Formal Cover Letter", level=1)
     doc.add_paragraph(results.get('narrative', {}).get('cover_letter_narrative', ''))
     
-    # Layer 4: Interview Prep
     doc.add_heading("Layer 4: Interview Drills", level=1)
-    questions = results.get('integrity', {}).get('interview_questions', {})
-    for q_type, q_text in questions.items():
-        doc.add_heading(q_type.replace('_', ' ').title(), level=2)
-        doc.add_paragraph(q_text)
+    drills = results.get('integrity', {}).get('interview_drills', [])
+    for d in drills:
+        doc.add_heading("Dynamic Drill", level=2)
+        doc.add_paragraph(f"Q: {d.get('question', '')}")
+        doc.add_paragraph(f"Hint: {d.get('strategic_hint', '')}")
 
     bio = BytesIO()
     doc.save(bio)
@@ -98,8 +79,8 @@ with st.sidebar:
     user_weaknesses = st.text_area("Gaps/Weaknesses", placeholder="e.g., Impatience")
     writing_dna_choice = st.selectbox("Base Writing Style", ["Blunt & Gritty", "Professional", "Academic"])
     
-    st.header("🧬 Linguistic DNA (V1 Style)")
-    style_file = st.file_uploader("Upload a Writing Sample (PDF/Docx)", type=["pdf", "docx"], key="style_upload")
+    st.header("🧬 Linguistic DNA")
+    style_file = st.file_uploader("Upload a Writing Sample", type=["pdf", "docx"], key="style_upload")
     style_text = ""
     if style_file:
         try:
@@ -128,7 +109,7 @@ st.title("🚀 Career Orchestrator: Multi-Agent Platform")
 c1, c2 = st.columns(2)
 with c1:
     company_name = st.text_input("Target Company", value="Quva Pharma")
-    job_level = st.selectbox("Job Level", ["Intern", "Junior", "Senior", "Lead"]) # Dynamic Variable
+    job_level = st.selectbox("Job Level", ["Intern", "Junior", "Senior", "Lead"]) 
 with c2:
     jd_input = st.text_area("Target Job Description", height=150)
 
@@ -143,10 +124,18 @@ if st.button("🔥 Run Full Optimization"):
                 strat = run_strategy_architect(st.session_state.resume_text, jd_input, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna_choice)
                 
                 st.write("🤖 Phase 2: ATS Architect...")
-                ats = run_ats_architect(st.session_state.resume_text, strat.get('missing_gaps', []), jd_input, strat.get('persona_assessment', ''), job_level, company_name, api_key)
+                # FIXED ORDER: resume_text, jd, job_level, company, gaps, api_key, writing_dna
+                ats = run_ats_architect(
+                    st.session_state.resume_text,
+                    jd_input,
+                    job_level,
+                    company_name,
+                    strat.get('missing_gaps', []),
+                    api_key,
+                    writing_dna_choice
+                )
                 
                 st.write("✍️ Phase 3: Human Narrator...")
-                # Dynamic call with style DNA
                 narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat.get('persona_assessment', ''), writing_dna_choice, company_name, job_level, api_key, style_text)
                 
                 st.write("🛡️ Phase 4: Integrity Guardian...")
@@ -163,13 +152,11 @@ if st.session_state.final_results:
     res = st.session_state.final_results
     st.divider()
     
-    # 🎯 PERSONA & INTERNAL STRATEGY (V1 Restoration)
     st.subheader("👤 Candidate Persona & Management Roadmap")
     col_narr, col_risk = st.columns(2)
     with col_narr:
         st.info(f"**Persona Fit:** {res['strategy'].get('persona_assessment', 'Standard')}")
     with col_risk:
-        # Fixed alignment
         st.warning(res['narrative'].get('internal_placement_strategy', "Internal Strategy processing..."))
 
     t1, t2, t3, t4 = st.tabs(["📊 Strategy", "📄 ATS Bullets", "✉️ Formal Cover Letter", "🎙️ Voice Practice"])
@@ -180,30 +167,16 @@ if st.session_state.final_results:
     
     with t2:
         st.subheader("🎯 ATS-Optimized Impact Bullets")
-        
-        # Get the 'ats' dictionary from the results
         ats_data = res.get('ats', {})
-        
         if ats_data:
-            # Match these keys EXACTLY to the agent's prompt
-            verdict = ats_data.get('recruiter_scan_verdict', "No verdict generated.")
-            keywords = ats_data.get('ats_keywords_hit', [])
-            
-            st.success(f"**Recruiter Scan Verdict:** {verdict}")
-            st.write(f"**Keywords Infiltrated:** {', '.join(keywords) if keywords else 'None identified.'}")
-            
+            st.success(f"**Recruiter Scan Verdict:** {ats_data.get('recruiter_scan_verdict', 'N/A')}")
+            st.write(f"**Keywords Infiltrated:** {', '.join(ats_data.get('ats_keywords_hit', []))}")
             st.divider()
-    
-            experience_list = ats_data.get('optimized_experience', [])
-            if experience_list:
-                for item in experience_list:
-                    # Logic: Use 'Role' or 'Job Title' fallback
-                    role_title = item.get('Role') or item.get('Job Title') or "Experience Entry"
-                    with st.expander(f"📂 {role_title}"):
-                        for bullet in item.get('Bullets', []):
-                            st.write(bullet)
-            else:
-                st.warning("No experience bullets were generated.")
+            for item in ats_data.get('optimized_experience', []):
+                role_title = item.get('Role') or item.get('Job Title') or "Experience Entry"
+                with st.expander(f"📂 {role_title} | {item.get('Tech_Stack', '')}"):
+                    for bullet in item.get('Bullets', []):
+                        st.write(bullet)
         else:
             st.error("ATS Data missing.")
 
@@ -213,35 +186,23 @@ if st.session_state.final_results:
         st.text_area("Review your Letter:", letter, height=400)
         st.download_button("📥 Download Report (.docx)", generate_docx_report(company_name, job_level, jd_input, res), file_name=f"{company_name}_Career_Pack.docx")
 
-   with t4:
+    with t4:
         st.subheader("🎙️ Interactive Technical Drill")
-        
-        # 1. Access the NEW list-based schema
         drills = res.get('integrity', {}).get('interview_drills', [])
-        
         if drills:
-            # 2. Create a map for the dropdown: "Question Text" -> "Hint Text"
             drill_map = {d['question']: d['strategic_hint'] for d in drills}
             q_selected = st.selectbox("Select Drill:", list(drill_map.keys()))
-            
             st.info(f"**Challenge:** {q_selected}")
-            
-            # 3. RESTORED: DYNAMIC HINT ENGINE
-            # This now pulls the specific hint tied to the selected question
             with st.expander("💡 View Strategic Hint (Tailored STAR)"):
                 st.write(drill_map[q_selected])
-                
-            # 4. AUDIO & RECORDING LOGIC
             if st.button("📢 Hear Question"):
                 tts = gTTS(text=q_selected, lang='en')
                 audio_fp = BytesIO()
                 tts.write_to_fp(audio_fp)
                 st.audio(audio_fp.getvalue(), format='audio/mp3')
-                
             st.divider()
             st.write("Record your answer:")
             audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
-            
             if audio_data:
                 st.audio(audio_data['bytes'])
                 if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
@@ -250,4 +211,4 @@ if st.session_state.final_results:
                         st.markdown("### 📝 Coach's Blunt Feedback")
                         st.warning(feedback)
         else:
-            st.warning("No drills generated. Please check the 'Integrity Guardian' agent output.")
+            st.warning("No drills generated.")
