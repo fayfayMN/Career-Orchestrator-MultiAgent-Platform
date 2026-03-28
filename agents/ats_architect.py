@@ -14,22 +14,38 @@ def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writin
     # The 'Workhorse' Verb List from your guide
     verbs = "Analyzed, Modeled, Evaluated, Engineered, Built, Trained, Optimized, Deployed, Designed, Automated"
 
-    # Inside agents/ats_architect.py
     prompt = f"""
-    ... (rest of prompt) ...
+    ACT AS: A Technical Resume Architect.
+    MANDATE: Rewrite the 'Projects' and 'Experience' sections to match the High-Signal Entry Level format.
     
+    INPUT:
+    - Resume: {resume_text[:2000]}
+    - Target JD: {jd[:1000]}
+
+    TASK:
+    1. For each Project or Role, identify the core 'Tech Stack' (e.g., Python, SQL, Power BI).
+    2. Rewrite bullets using the 4-step pattern: Problem, Technical Method, Result, and Visualization/Deployment.
+    3. Use 'Workhorse' verbs: Engineered, Normalized, Architected.
+
     OUTPUT FORMAT (STRICT JSON ONLY):
     {{
       "optimized_experience": [
         {{
-          "Role": "Job Title",
-          "Bullets": ["✅ [Verb] + [Task] + [Tools] + [Impact]"]
+          "Role": "Project or Job Title",
+          "Tech_Stack": "Python, Pandas, Scikit-learn",
+          "Bullets": [
+            "• Built/Analyzed [Problem] using [Dataset Size] records.",
+            "• Performed [Technical Method/Cleaning] with [Tools].",
+            "• Trained/Applied [Algorithms] achieving [Metric] accuracy/impact [cite: 2026-01-09].",
+            "• Visualized [Outcome] using [Visualization Tool] to [Stakeholder Benefit]."
+          ]
         }}
       ],
-      "ats_keywords_hit": ["List of keywords from JD found in bullets"],
-      "recruiter_scan_verdict": "Blunt 1-sentence assessment of candidate grit."
+      "recruiter_scan_verdict": "...",
+      "ats_keywords_hit": []
     }}
     """
+    
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
