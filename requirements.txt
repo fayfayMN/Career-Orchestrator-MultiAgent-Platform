@@ -1,11 +1,6 @@
 streamlit
-langchain
-langchain-community
-langchain-openai
-python-docx
-streamlit-mic-recorder
-gTTS
-streamlit
 openai
 pdfplumber
+python-docx
+gTTS
 st-audiorec
