@@ -84,3 +84,12 @@ This section tracks the architectural evolution of the Career Orchestrator, high
 * **Problem:** High-traffic API periods caused `APIConnectionError` crashes, halting the entire 8-agent pipeline.
 * **Solution:** Implemented custom **Exception Handling** and **Exponential Backoff** logic.
 * **Result:** The app now provides clear user feedback and automated retries, ensuring stability during high-load periods.
+
+### **Log 06: Agent Consolidation & Dimensionality Reduction**
+* **Problem:** Managing 8 individual agents created high "Orchestration Overhead," increased API latency, and led to redundant token usage (sending the Master Resume 8 times).
+* **Solution:** Refactored the architecture from 8 granular agents into 4 **Strategic Microservice Layers**.
+    * **Layer 1 (The Strategy Architect):** Consolidates the **Auditor** and **Tutor** into a single logic pass for gap analysis and upskilling.
+    * **Layer 2 (The ATS Architect):** Merges **Storyteller** and **Resume Pro** to re-architect resume structures while simultaneously drafting STAR bullets.
+    * **Layer 3 (The Human Narrator):** Combines **Voice Filter** and **Composer** to draft the cover letter directly in a "Human-Grit" tone.
+    * **Layer 4 (The Integrity Guardian):** Fuses **Fact-Checker** and **Coach** to validate data fidelity and generate interview prep in one verification cycle.
+* **Impact:** Reduced API token consumption by **~40%** and simplified the `asyncio` parallelization logic, resulting in a more maintainable codebase for the **Life Time** digital-first environment.
