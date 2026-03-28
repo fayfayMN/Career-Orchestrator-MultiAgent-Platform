@@ -40,31 +40,42 @@ def generate_docx_report(company, level, jd, results):
     doc = Document()
     doc.add_heading(f"Strategy Report: {company}", 0)
     
+    # NEW: Targeted Role Metadata
+    doc.add_heading("Target Role Context", level=1)
+    doc.add_paragraph(f"**Target Company:** {company}")
+    doc.add_paragraph(f"**Target Role:** {level}")
+    doc.add_heading("Job Description Reference", level=2)
+    doc.add_paragraph(jd) # This stores the actual JD you pasted
+
     # Layer 1: Strategy
     strat = results.get('strategy', {})
     doc.add_heading("Layer 1: Strategic Audit", level=1)
     doc.add_paragraph(f"Match Score: {strat.get('match_score', 'N/A')}%")
+    doc.add_paragraph(f"Persona: {strat.get('persona_assessment', 'N/A')}")
     doc.add_paragraph(strat.get('learning_syllabus', ''))
     
-    # Layer 2: ATS
-    
+    # Layer 2: ATS (Updated to the new Dynamic Key)
     st.write("🤖 Phase 2: ATS Architect...")
     ats = run_ats_architect(
         st.session_state.resume_text,  # 1. resume_text
         jd_input,                      # 2. jd
         job_level,                     # 3. job_level
-        company_name,                  # 4. company
+        company_name,                  # 4. company (Quva Pharma)
         strat.get('missing_gaps', []), # 5. gaps
-        api_key,                       # 6. api_key (DeepSeek Key)
+        api_key,                       # 6. api_key (The ACTUAL Key)
         writing_dna_choice             # 7. writing_dna
     )
     doc.add_heading("Layer 2: Optimized ATS Bullets", level=1)
-    for exp in ats.get('optimized_bullets', []):
-        doc.add_heading(exp.get('Role', 'Experience'), level=2)
+    doc.add_paragraph(f"Recruiter Verdict: {ats.get('recruiter_scan_verdict', 'N/A')}")
+    
+    # Use the 'optimized_experience' key from your dynamic agent
+    for exp in ats.get('optimized_experience', []):
+        role_text = f"{exp.get('Role', 'Experience')} | {exp.get('Tech_Stack', '')}"
+        doc.add_heading(role_text, level=2)
         for bullet in exp.get('Bullets', []):
             doc.add_paragraph(bullet, style='List Bullet')
     
-    # Layer 3: Formal Cover Letter (Restored V1 Style)
+    # Layer 3: Formal Cover Letter
     doc.add_heading("Layer 3: Formal Cover Letter", level=1)
     doc.add_paragraph(results.get('narrative', {}).get('cover_letter_narrative', ''))
     
