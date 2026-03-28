@@ -7,11 +7,15 @@ from docx import Document
 from gtts import gTTS
 from st_audiorec import st_audiorec
 
-# --- 1. PATH RESILIENCE (Log 05) ---
-# CRITICAL: This MUST come before 'from agents import...'
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
+# --- 1. AGGRESSIVE PATH RESILIENCE (Log 05) ---
+# This MUST happen before any 'from agents import...' calls.
+root_path = os.path.dirname(os.path.abspath(__file__))
+agents_path = os.path.join(root_path, "agents")
+
+# Add both the root and agents folder to the system search path
+for path in [root_path, agents_path]:
+    if path not in sys.path:
+        sys.path.insert(0, path)
 
 # --- 2. IMPORT GENERALIZED AGENTS ---
 try:
@@ -20,7 +24,8 @@ try:
     from agents.human_narrator import run_human_narrator
     from agents.integrity import run_integrity_guardian
 except Exception as e:
-    st.error(f"⚠️ App failed to load agents: {e}. Check if agents/__init__.py exists.")
+    st.error(f"🛑 Critical Load Failure: {e}")
+    st.info("Ensure your folder is named 'agents' (lowercase) and contains '__init__.py' (no spaces, double underscores).")
     st.stop()
 
 # --- 3. CONFIGURATION & STATE ---
@@ -63,6 +68,7 @@ with st.sidebar:
     st.header("👤 Persona Discovery")
     api_key = st.text_input("DeepSeek API Key", type="password")
     
+    # Generalized inputs for any job seeker
     user_strengths = st.text_area("Your Top 3 Strengths", placeholder="e.g., Reliability, Python, Grit")
     user_weaknesses = st.text_area("Gaps/Weaknesses", placeholder="e.g., Public speaking")
     writing_dna = st.selectbox("Writing Style", ["Blunt & Gritty", "Professional", "Academic"])
@@ -98,14 +104,14 @@ if st.button("🔥 Run Full Optimization") and st.session_state.resume_text:
     else:
         with st.status("Orchestrating Agents...") as status:
             # Phase 1: Strategy & Persona Discovery
-            st.write("Phase 1: Discovering Persona...")
+            st.write("Phase 1: Analyzing Persona...")
             strat = run_strategy_architect(st.session_state.resume_text, jd_input, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna)
             
             # Phase 2: ATS keyword mapping
             st.write("Phase 2: Optimizing Keywords...")
             ats = run_ats_architect(st.session_state.resume_text, strat.get('missing_gaps', []), jd_input, strat.get('persona_assessment', ''), job_level, company_name, api_key)
             
-            # Phase 3: Human Voice Narrative (Uses the Persona assessment from Phase 1)
+            # Phase 3: Human Voice Narrative
             st.write("Phase 3: Crafting Narrative...")
             narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat.get('persona_assessment', 'Technical Professional'), writing_dna, company_name, api_key)
             
@@ -151,5 +157,3 @@ if st.session_state.final_results:
             wav_audio_data = st_audiorec()
             if wav_audio_data:
                 st.info("Record received. Analyzing...")
-
-   
