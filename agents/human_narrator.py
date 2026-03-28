@@ -16,32 +16,31 @@ def run_human_narrator(resume_text, jd, persona_assessment, writing_dna, company
     style_instruction = f"Mimic the linguistic DNA (sentence structure, tone, 'grit') found in this sample: {style_sample[:1500]}" if style_sample else f"Follow the {writing_dna} style guide."
 
     prompt = f"""
-    ACT AS: A Career Narrative Architect.
-    STYLE: Standard Formal Cover Letter.
-    WRITING DNA: {writing_dna}
-    MANDATE: {style_instruction}
+    ACT AS: A Senior Executive Career Coach.
+    STYLE: Professional, Formal, and Blunt.
+    MANDATE: {style_instruction} # Using your uploaded V1 DNA
     
     CONTEXT:
-    - Target Organization: {company_name}
-    - Seniority Level: {job_level}
-    - User's Specific Persona: {persona_assessment}
-    - User's Experience Data: {resume_text[:2000]}
-    - Job Requirements: {jd[:1000]}
+    - Target: {company_name} | Role: {job_level}
+    - Key Wins: 1st Place AGENT.AI, 99.9% USPS Accuracy, 3.9 GPA [cite: 2026-01-09, 2026-03-23, 2026-03-04].
 
-    TASK:
-    1. THE FORMAT: Write a standard 3-paragraph formal cover letter (Header, Salutation, Body, Closing).
-    2. THE ANCHORS: Lead with the 3.9 GPA and #1 AGENT.AI win [cite: 2026-03-04, 2026-01-09].
-    3. THE BRIDGE: For {job_level} level, link the 99.9% USPS accuracy to managing 'messy' data pipelines [cite: 2026-03-23, 2026-03-28].
-    4. VETO: Strictly avoid these words: {', '.join(blacklist)}.
+    TASK: Write a standard, formal cover letter. Follow this EXACT structure:
+    1. SUBJECT LINE: Reference the {job_level} role and specific team (e.g., A3 Team).
+    2. SALUTATION: Professional greeting.
+    3. PARAGRAPH 1 (THE HOOK): Directly link the #1 state ranking in AGENT.AI and 3.9 GPA to their need for 'production-ready' data pipelines [cite: 2026-01-09].
+    4. PARAGRAPH 2 (THE GRIZZLED BRIDGE): Use the 7 years at USPS and 99.9% accuracy to prove 'Operational Discipline' in managing messy, multi-source data [cite: 2026-03-23].
+    5. PARAGRAPH 3 (THE MISSION): Connect bilingual skills and interest in medication access to the {company_name} team culture [cite: 2026-03-28].
+    6. CLOSING: Professional sign-off.
+
+    VETO WORDS: {', '.join(blacklist)}.
 
     OUTPUT FORMAT (STRICT JSON ONLY):
     {{
-      "cover_letter_narrative": "Full formal letter content with line breaks...",
-      "internal_placement_strategy": "## 🛡️ Internal Verdict\\n- **Assessment:** [Blunt fit for {job_level}]\\n- **Risks:** [Impatience/Culture clash]\\n- **Onboarding:** [Specific tips]",
-      "value_anchor": "Link between USPS/AGENT.AI and {company_name}"
+      "cover_letter_narrative": "Subject: ...\\n\\nDear Hiring Manager,\\n\\n[Paragraph 1]\\n\\n[Paragraph 2]\\n\\n[Paragraph 3]\\n\\nSincerely,\\n\\n[Your Name]",
+      "internal_placement_strategy": "## 🛡️ Internal Verdict\\n- **Assessment:** [Blunt fit]\\n- **Risks:** [Impatience/Bluntness]\\n- **Onboarding:** [Specific tips]",
+      "value_anchor": "Link between USPS reliability and Data Management"
     }}
     """
-
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
