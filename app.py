@@ -1,7 +1,3 @@
-# Add this right after Section 1: PATH RESILIENCE
-import logging
-logging.basicConfig(level=logging.INFO)
-
 import streamlit as st
 import pdfplumber
 import sys
@@ -27,7 +23,6 @@ try:
     from agents.integrity import run_integrity_guardian
 except Exception as e:
     st.error(f"🛑 Critical Load Failure: {e}")
-    st.info("Ensure agents/__init__.py exists and matches GitHub precisely.")
     st.stop()
 
 # --- 4. SESSION STATE ---
@@ -84,52 +79,37 @@ with c1:
 with c2:
     jd_input = st.text_area("Target Job Description", height=150)
 
-# --- 8. ORCHESTRATION (Hardened & Verified) ---
+# --- 8. ORCHESTRATION ---
 if st.button("🔥 Run Full Optimization") and st.session_state.resume_text:
     if not api_key:
-        st.warning("Please enter your API Key in the sidebar.")
-    elif len(jd_input) < 20:
-        st.warning("The Job Description is too short. Please paste a full JD to ensure agent accuracy.")
+        st.warning("Please enter your API Key.")
     else:
         try:
             with st.status("Orchestrating Agents...") as status:
-                # Phase 1: Strategy
-                st.write("🕵️ Phase 1: Analyzing Persona & Gaps...")
+                st.write("Phase 1: Strategy...")
                 strat = run_strategy_architect(st.session_state.resume_text, jd_input, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna)
                 
-                # Phase 2: ATS
-                st.write("🤖 Phase 2: Mapping ATS Keywords...")
+                st.write("Phase 2: ATS Optimization...")
                 ats = run_ats_architect(st.session_state.resume_text, strat.get('missing_gaps', []), jd_input, strat.get('persona_assessment', ''), job_level, company_name, api_key)
                 
-                # Phase 3: Narrative
-                st.write("✍️ Phase 3: Crafting Human Narrative...")
+                st.write("Phase 3: Narrative...")
                 narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat.get('persona_assessment', 'Technical Professional'), writing_dna, company_name, api_key)
                 
-                # Phase 4: Integrity
-                st.write("🛡️ Phase 4: Running Integrity Audit...")
+                st.write("Phase 4: Integrity Check...")
                 integrity = run_integrity_guardian(st.session_state.resume_text, ats, narrative, strat.get('missing_gaps', []), api_key)
                 
-                # Save to State
-                st.session_state.final_results = {
-                    "strategy": strat, 
-                    "ats": ats, 
-                    "narrative": narrative, 
-                    "integrity": integrity
-                }
+                st.session_state.final_results = {"strategy": strat, "ats": ats, "narrative": narrative, "integrity": integrity}
                 status.update(label="✅ Optimization Complete!", state="complete")
-            
-            # Force a rerun to show the results in Section 9
             st.rerun() 
-
         except Exception as e:
             st.error(f"❌ Orchestration Error: {e}")
-            st.info("Tip: Verify your DeepSeek API key has enough credits and that your 'agents/' files use the same function names.")
-# --- 9. RESULTS DISPLAY ---
+
+# --- 9. RESULTS ---
 if st.session_state.final_results:
     res = st.session_state.final_results
     st.divider()
     report_bytes = generate_docx_report(company_name, job_level, jd_input, res)
-    st.download_button(label=f"📥 Download {company_name} Strategy Report", data=report_bytes, file_name=f"{company_name}_Report.docx")
+    st.download_button(label=f"📥 Download Report", data=report_bytes, file_name=f"{company_name}_Report.docx")
     t1, t2, t3 = st.tabs(["📊 Strategy", "📄 ATS Resume", "🎙️ Voice Practice"])
     with t1:
         st.metric("Match Score", f"{res['strategy'].get('match_score', 0)}%")
@@ -137,7 +117,7 @@ if st.session_state.final_results:
     with t2:
         st.json(res['ats']) 
     with t3:
-        st.subheader("Interactive Interview Drill")
+        st.subheader("Interview Drill")
         questions = res['integrity'].get('interview_questions', {})
         if questions:
             q_selected = st.selectbox("Select Drill:", list(questions.values()))
