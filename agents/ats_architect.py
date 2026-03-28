@@ -3,7 +3,9 @@ import json
 from openai import OpenAI
 
 #  Add 'gaps' to the signature
+# agents/ats_architect.py
 def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writing_dna):
+   
     """
     Dynamic Layer 2: The Impact-First Resume Rewriter.
     Updated to handle 7 arguments to match the app.py handshake.
