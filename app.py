@@ -47,7 +47,9 @@ except Exception as e:
     st.stop()
 
 # --- 4. CONFIGURATION & STATE ---
-st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")stop()
+st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")
+
+# If you had a stop() here by mistake, delete it unless it's inside an 'except' block.
 
 # --- 3. CONFIGURATION & STATE ---
 st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")
