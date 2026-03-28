@@ -5,7 +5,8 @@ import os
 from io import BytesIO
 from docx import Document
 from gtts import gTTS
-from st_audiorec import st_audiorec
+# FIX: Swapped to the stable recorder for Streamlit Cloud
+from streamlit_mic_recorder import mic_recorder
 
 # --- 1. PATH RESILIENCE ---
 root_path = os.path.dirname(os.path.abspath(__file__))
@@ -63,7 +64,7 @@ with st.sidebar:
     st.header("📂 Ingestion")
     uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
     
-    # AUTOMATIC PARSING: No button required. If file exists, process it.
+    # AUTOMATIC PARSING
     if uploaded_file:
         try:
             if uploaded_file.type == "application/pdf":
@@ -75,8 +76,6 @@ with st.sidebar:
             
             if st.session_state.resume_text:
                 st.success("✅ Resume Memory Locked")
-            else:
-                st.error("Could not extract text from file.")
         except Exception as e:
             st.error(f"Error parsing: {e}")
 
@@ -91,13 +90,10 @@ with c2:
 
 # --- 8. ORCHESTRATION ---
 if st.button("🔥 Run Full Optimization"):
-    # Check 1: Is resume loaded?
     if not st.session_state.resume_text:
-        st.error("❌ No resume found! Please upload and click 'Parse Resume' in the sidebar first.")
-    # Check 2: Is API Key there?
+        st.error("❌ No resume found! Please upload a file in the sidebar first.")
     elif not api_key:
-        st.warning("⚠️ Please enter your DeepSeek API Key in the sidebar.")
-    # Check 3: Is JD there?
+        st.warning("⚠️ Please enter your DeepSeek API Key.")
     elif len(jd_input) < 20:
         st.warning("⚠️ The Job Description is too short.")
     else:
@@ -106,7 +102,6 @@ if st.button("🔥 Run Full Optimization"):
                 st.write("🕵️ Phase 1: Strategy Architect...")
                 strat = run_strategy_architect(st.session_state.resume_text, jd_input, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna)
                 
-                # Check if Phase 1 actually returned data
                 if "error" in strat:
                     st.error(f"Phase 1 Failed: {strat['error']}")
                     st.stop()
@@ -132,14 +127,18 @@ if st.session_state.final_results:
     st.divider()
     report_bytes = generate_docx_report(company_name, job_level, jd_input, res)
     st.download_button(label=f"📥 Download Report", data=report_bytes, file_name=f"{company_name}_Report.docx")
+    
     t1, t2, t3 = st.tabs(["📊 Strategy", "📄 ATS Resume", "🎙️ Voice Practice"])
+    
     with t1:
         st.metric("Match Score", f"{res['strategy'].get('match_score', 0)}%")
         st.markdown(res['strategy'].get('learning_syllabus', ''))
+    
     with t2:
         st.json(res['ats']) 
+    
     with t3:
-        st.subheader("Interview Drill")
+        st.subheader("Interactive Interview Drill")
         questions = res['integrity'].get('interview_questions', {})
         if questions:
             q_selected = st.selectbox("Select Drill:", list(questions.values()))
@@ -148,14 +147,11 @@ if st.session_state.final_results:
                 audio_fp = BytesIO()
                 tts.write_to_fp(audio_fp)
                 st.audio(audio_fp.getvalue(), format='audio/mp3')
-            with t3:
-    st.subheader("Interactive Interview Drill")
-    questions = res['integrity'].get('interview_questions', {})
-    if questions:
-        # ... (your selectbox and Hear Question logic) ...
-        
-        st.write("Record your answer:")
-        audio = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
-        if audio:
-            st.audio(audio['bytes'])
-            st.success("Audio captured! Ready for Phase 5 (Analysis).")
+            
+            st.write("---")
+            st.write("Record your answer:")
+            # Updated to use the stable mic_recorder
+            audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
+            if audio_data:
+                st.audio(audio_data['bytes'])
+                st.success("✅ Audio captured! Use this to practice your delivery.")
