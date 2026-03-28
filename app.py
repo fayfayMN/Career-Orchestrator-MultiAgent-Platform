@@ -145,21 +145,33 @@ if st.session_state.final_results:
                 st.write(f"✅ {bullet}")
             st.write("") # Spacer
     
-    with t3:
-        st.subheader("Interactive Interview Drill")
+with t3:
+        st.subheader("🎙️ Interactive Technical Drill")
         questions = res['integrity'].get('interview_questions', {})
+        
         if questions:
-            q_selected = st.selectbox("Select Drill:", list(questions.values()))
+            # 1. The Selector
+            q_key = st.selectbox("Select Drill Type:", list(questions.keys()))
+            full_question = questions[q_key]
+            
+            # 2. FULL TEXT VISIBILITY: Display the full question here
+            st.info(f"**Current Challenge:**\n\n{full_question}")
+            
             if st.button("📢 Hear Question"):
-                tts = gTTS(text=q_selected, lang='en')
+                tts = gTTS(text=full_question, lang='en')
                 audio_fp = BytesIO()
                 tts.write_to_fp(audio_fp)
                 st.audio(audio_fp.getvalue(), format='audio/mp3')
             
-            st.write("---")
+            st.divider()
+            
+            # 3. RECORDING ENGINE
             st.write("Record your answer:")
-            # Updated to use the stable mic_recorder
             audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
+            
             if audio_data:
                 st.audio(audio_data['bytes'])
-                st.success("✅ Audio captured! Use this to practice your delivery.")
+                if st.button("⚖️ Get Blunt Feedback"):
+                    feedback = evaluate_answer(full_question, "Audio response provided.", api_key)
+                    st.markdown("### 📝 Coach Feedback")
+                    st.warning(feedback)
