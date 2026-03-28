@@ -145,33 +145,46 @@ if st.session_state.final_results:
                 st.write(f"✅ {bullet}")
             st.write("") # Spacer
     
-with t3:
-        st.subheader("🎙️ Interactive Technical Drill")
-        questions = res['integrity'].get('interview_questions', {})
-        
-        if questions:
-            # 1. The Selector
-            q_key = st.selectbox("Select Drill Type:", list(questions.keys()))
-            full_question = questions[q_key]
+    with t3:
+            st.subheader("🎙️ Interactive Technical Drill")
+            # Pull questions from the Integrity Guardian (Phase 4)
+            questions = res['integrity'].get('interview_questions', {})
             
-            # 2. FULL TEXT VISIBILITY: Display the full question here
-            st.info(f"**Current Challenge:**\n\n{full_question}")
-            
-            if st.button("📢 Hear Question"):
-                tts = gTTS(text=full_question, lang='en')
-                audio_fp = BytesIO()
-                tts.write_to_fp(audio_fp)
-                st.audio(audio_fp.getvalue(), format='audio/mp3')
-            
-            st.divider()
-            
-            # 3. RECORDING ENGINE
-            st.write("Record your answer:")
-            audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
-            
-            if audio_data:
-                st.audio(audio_data['bytes'])
-                if st.button("⚖️ Get Blunt Feedback"):
-                    feedback = evaluate_answer(full_question, "Audio response provided.", api_key)
-                    st.markdown("### 📝 Coach Feedback")
-                    st.warning(feedback)
+            if questions:
+                q_key = st.selectbox("Select Drill Type:", list(questions.keys()))
+                full_question = questions[q_key]
+                
+                # 1. FULL TEXT VISIBILITY
+                st.info(f"**Current Challenge:**\n\n{full_question}")
+                
+                # 2. THE HINT ENGINE (Restore 'How to Answer')
+                with st.expander("💡 View Strategic Hint (STAR Method)"):
+                    # Dynamically generate a hint based on the question type
+                    st.write("To nail this, focus on:")
+                    st.write("- **Situation:** Briefly describe the AGENT.AI or Hackathon context [cite: 2026-01-09, 2026-03-11].")
+                    st.write("- **Task:** What was the specific data bottleneck?")
+                    st.write("- **Action:** Use 'Workhorse' verbs: *Engineered, Normalized, Architected*.")
+                    st.write("- **Result:** Mention the 1st Place win or the % improvement.")
+    
+                if st.button("📢 Hear Question"):
+                    tts = gTTS(text=full_question, lang='en')
+                    audio_fp = BytesIO()
+                    tts.write_to_fp(audio_fp)
+                    st.audio(audio_fp.getvalue(), format='audio/mp3')
+                
+                st.divider()
+                
+                # 3. RECORDING & FEEDBACK LOOP
+                st.write("Record your answer:")
+                audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
+                
+                if audio_data:
+                    st.audio(audio_data['bytes'])
+                    
+                    # The 'Coach' Button triggers the evaluator.py logic
+                    if st.button("⚖️ Get Blunt Feedback"):
+                        with st.spinner("Analyzing your response..."):
+                            # We pass the question to the Evaluator agent
+                            feedback = evaluate_answer(full_question, "Audio response captured.", api_key)
+                            st.markdown("### 📝 Coach's Blunt Feedback")
+                            st.warning(feedback) # Using warning for that 'Blunt' visual style)
