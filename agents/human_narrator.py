@@ -21,8 +21,11 @@ def run_human_narrator(resume_text, jd, persona, writing_dna, company, job_level
     1. THE HOOK ({job_level}): 
        - If 'Intern/Junior': Focus on GPA, competition wins, and 'Eagerness to contribute' to {company}'s specific tech stack.
        - If 'Senior/Lead': Focus on ROI, team leadership, and architectural vision.
-    2. THE STAR BRIDGE: Identify the user's #1 metric (e.g., 99.9% accuracy or #1 ranking). [cite: 127, 102]
-       - PIVOT that metric to {company}'s "Key Responsibilities" (e.g., Jira normalization or SLA tracking). [cite: 87]
+    
+    2. THE STAR BRIDGE: 
+       - Search {resume_text} for the candidate's highest quantitative metric (e.g., %, $, #, or ranking).
+       - If no metric exists, identify their most significant technical project outcome.
+       - PIVOT that specific achievement to solve a core problem found in the {company} JD.
     3. THE ALIGNMENT: Reference {company}'s mission (e.g., 'assembling TVs in the USA' for Element). [cite: 85]
 
     VETO: Strictly avoid {', '.join(blacklist)}.
