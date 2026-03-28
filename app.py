@@ -166,19 +166,33 @@ if st.session_state.final_results:
         st.markdown(res['strategy'].get('learning_syllabus', ''))
     
     with t2:
-        st.subheader("🎯 ATS-Optimized Impact Bullets")
+        
+        st.subheader("📄 Tailored Technical Resume")
         ats_data = res.get('ats', {})
+        
         if ats_data:
-            st.success(f"**Recruiter Scan Verdict:** {ats_data.get('recruiter_scan_verdict', 'N/A')}")
-            st.write(f"**Keywords Infiltrated:** {', '.join(ats_data.get('ats_keywords_hit', []))}")
+            # Professional Header
+            st.markdown(f"### {st.session_state.get('user_name', 'Feifei Li')}")
+            st.caption("Data Science | Operational Excellence | Data Integrity Specialist")
             st.divider()
+    
+            # Iterate through the FULL reconstruction
             for item in ats_data.get('optimized_experience', []):
-                role_title = item.get('Role') or item.get('Job Title') or "Experience Entry"
-                with st.expander(f"📂 {role_title} | {item.get('Tech_Stack', '')}"):
-                    for bullet in item.get('Bullets', []):
-                        st.write(bullet)
+                role = item.get('Role', 'Project')
+                stack = item.get('Tech_Stack', 'Technical Stack')
+                
+                # This line replicates your "Loan Approval | Python" header exactly
+                st.markdown(f"#### {role} | {stack}")
+                
+                # Display the 4 STAR bullets
+                for bullet in item.get('Bullets', []):
+                    # Clean up bullet icons for a professional look
+                    clean_bullet = bullet.lstrip('• ').lstrip('✅ ')
+                    st.write(f"• {clean_bullet}")
+                
+                st.write("") # Spacer between roles
         else:
-            st.error("ATS Data missing.")
+            st.error("No experience data generated. Check agent logic.")
 
     with t3:
         st.subheader("✉️ Formal Persona-Driven Cover Letter")
