@@ -2,12 +2,14 @@
 import json
 from openai import OpenAI
 
-def run_ats_architect(resume_text, jd, job_level, company, api_key, writing_dna):
+#  Add 'gaps' to the signature
+def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writing_dna):
     """
     Dynamic Layer 2: The Impact-First Resume Rewriter.
-    Uses the 'Action Verb + Built + Tools + Result' formula for any user.
+    Updated to handle 7 arguments to match the app.py handshake.
     """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+
 
     # The 'Workhorse' Verb List from your guide
     verbs = "Analyzed, Modeled, Evaluated, Engineered, Built, Trained, Optimized, Deployed, Designed, Automated"
