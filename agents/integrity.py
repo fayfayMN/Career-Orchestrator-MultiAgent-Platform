@@ -62,8 +62,8 @@ def evaluate_interview_voice(question, transcribed_answer, api_key):
 # --- TASK 3: THE REORG COACH (TEXT FEEDBACK) ---
 def evaluate_and_reorg_answer(question, answer, api_key):
     """
-    Consolidated Layer 5: The Blunt Coach.
-    This provides the readable feedback and the 'Perfect' STAR answer.
+    Consolidated Layer 5: The Blunt Coach with Project Isolation.
+    Prevents 'Metric Leakage' between USPS, AGENT.AI, and Data Projects.
     """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
@@ -71,21 +71,26 @@ def evaluate_and_reorg_answer(question, answer, api_key):
     QUESTION: {question}
     USER_RAW_ANSWER: {answer}
     
+    MANDATE: STRICT PROJECT ISOLATION. 
+    - If the question is about the '70,000-row survey', ONLY use facts about Python/SQL/Power BI. 
+    - DO NOT mention 'USPS' or 'AGENT.AI' unless the user specifically brought them up in the answer.
+    - Hallucinating results (like 99.9% accuracy) into a Data Engineering question is a FATAL ERROR.
+
     TASK:
-    1. BLUNT FEEDBACK: Grade 1-10 on technical grit.
-    2. THE REORG (STAR METHOD): Rewrite their answer into a high-impact narrative.
-       - Focus on: 3.9 GPA, #1 AGENT.AI win, and 99.9% USPS accuracy [cite: 2026-03-04, 2026-01-09, 2026-03-23].
-       - Use 'Workhorse' verbs (Built, Cleaned, Architected).
-    
-    STYLE: Blunt, no fluff.
+    1. BLUNT FEEDBACK: Grade 1-10. Did they actually explain the ETL architecture or just give fluff?
+    2. THE REORG (STAR METHOD): 
+       - S: Define the specific dataset (Survey vs. Fraud vs. USPS).
+       - T: The technical bottleneck (Schema evolution, cleaning, etc.).
+       - A: Workhorse verbs (Normalizing, Indexing, Scripting).
+       - R: The technical outcome (Validated dashboard, 100% clean schema).
     """
     
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
-            messages=[{"role": "system", "content": "You are a blunt Interview Coach. You hate AI-slop."},
+            messages=[{"role": "system", "content": "You are a Ruthless Technical Coach. You hate project contamination."},
                       {"role": "user", "content": prompt}]
         )
         return response.choices[0].message.content
     except Exception as e:
-        return f"Error connecting to Coach: {str(e)}"
+        return f"Coach Error: {str(e)}"
