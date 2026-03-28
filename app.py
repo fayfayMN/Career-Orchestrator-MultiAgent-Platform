@@ -119,8 +119,7 @@ if st.button("🔥 Run Full Optimization") and st.session_state.resume_text:
 
         except Exception as e:
             st.error(f"❌ Orchestration Error: {e}")
-            st.info("Tip: Verify your DeepSeek API key has enough credits and that your 'agents/' files use the same function names."))
-
+            st.info("Tip: Verify your DeepSeek API key has enough credits and that your 'agents/' files use the same function names.")
 # --- 9. RESULTS DISPLAY ---
 if st.session_state.final_results:
     res = st.session_state.final_results
