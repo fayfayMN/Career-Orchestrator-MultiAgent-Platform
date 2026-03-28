@@ -59,16 +59,26 @@ with st.sidebar:
     user_weaknesses = st.text_area("Gaps/Weaknesses", placeholder="e.g., Public speaking")
     writing_dna = st.selectbox("Writing Style", ["Blunt & Gritty", "Professional", "Academic"])
     st.divider()
+    
     st.header("📂 Ingestion")
     uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
-    if uploaded_file and st.button("Parse Resume"):
-        if uploaded_file.type == "application/pdf":
-            with pdfplumber.open(uploaded_file) as pdf:
-                st.session_state.resume_text = "\n".join([p.extract_text() for p in pdf.pages if p.extract_text()])
-        else:
-            doc = Document(uploaded_file)
-            st.session_state.resume_text = "\n".join([p.text for p in doc.paragraphs])
-        st.success("✅ Resume Loaded")
+    
+    # AUTOMATIC PARSING: No button required. If file exists, process it.
+    if uploaded_file:
+        try:
+            if uploaded_file.type == "application/pdf":
+                with pdfplumber.open(uploaded_file) as pdf:
+                    st.session_state.resume_text = "\n".join([p.extract_text() for p in pdf.pages if p.extract_text()])
+            else:
+                doc = Document(uploaded_file)
+                st.session_state.resume_text = "\n".join([p.text for p in doc.paragraphs])
+            
+            if st.session_state.resume_text:
+                st.success("✅ Resume Memory Locked")
+            else:
+                st.error("Could not extract text from file.")
+        except Exception as e:
+            st.error(f"Error parsing: {e}")
 
 # --- 7. MAIN UI ---
 st.title("🚀 Career Orchestrator: Multi-Agent Platform")
