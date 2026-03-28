@@ -30,16 +30,28 @@ def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writin
       "recruiter_scan_verdict": "Blunt 1-sentence assessment of candidate grit."
     }}
     """
-
-      
-
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
-            messages=[{"role": "system", "content": "You are a ruthless ATS Engineer. No fluff."},
-                      {"role": "user", "content": prompt}],
+            messages=[{"role": "user", "content": prompt}],
             response_format={'type': 'json_object'}
         )
-        return json.loads(response.choices[0].message.content)
+        content = response.choices[0].message.content.strip()
+        
+        # MANDATORY: Strip Markdown backticks that break json.loads()
+        if content.startswith("```"):
+            content = content.split("```")[1]
+            if content.startswith("json"):
+                content = content[4:]
+            content = content.split("```")[0].strip()
+            
+        return json.loads(content)
     except Exception as e:
-        return {"error": str(e)}
+        # Returning a structured error helps the UI tell you WHAT went wrong
+        return {
+            "optimized_experience": [],
+            "recruiter_scan_verdict": f"Error: {str(e)}",
+            "ats_keywords_hit": []
+        }
+
+      
