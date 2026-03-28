@@ -1,13 +1,3 @@
-# --- 2. IMPORT GENERALIZED AGENTS ---
-try:
-    from agents.strategy_arch import run_strategy_architect
-    from agents.ats_architect import run_ats_architect  # <--- MAKE SURE THIS LINE IS HERE
-    from agents.human_narrator import run_human_narrator
-    from agents.integrity import run_integrity_guardian
-except ImportError as e:
-    st.error(f"⚠️ Import Error: {e}. Ensure agents/__init__.py exists.")
-
-
 import streamlit as st
 import pdfplumber
 import sys
@@ -18,6 +8,7 @@ from gtts import gTTS
 from st_audiorec import st_audiorec
 
 # --- 1. PATH RESILIENCE (Log 05) ---
+# CRITICAL: This MUST come before 'from agents import...'
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
@@ -28,8 +19,9 @@ try:
     from agents.ats_architect import run_ats_architect
     from agents.human_narrator import run_human_narrator
     from agents.integrity import run_integrity_guardian
-except ImportError as e:
-    st.error(f"⚠️ Import Error: {e}. Ensure agents/__init__.py exists.")
+except Exception as e:
+    st.error(f"⚠️ App failed to load agents: {e}. Check if agents/__init__.py exists.")
+    st.stop()
 
 # --- 3. CONFIGURATION & STATE ---
 st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")
@@ -39,16 +31,14 @@ if 'resume_text' not in st.session_state:
 if 'final_results' not in st.session_state:
     st.session_state.final_results = None
 
-# --- 4. HELPERS: DOWNLOAD ENGINE (Log 03) ---
+# --- 4. HELPERS: DOWNLOAD ENGINE ---
 def generate_docx_report(company, level, jd, results):
     doc = Document()
     doc.add_heading(f"Strategy Report: {company}", 0)
     
-    # Metadata
     doc.add_heading("Context & JD Metadata", level=1)
     doc.add_paragraph(f"Target: {company} | Level: {level}")
     
-    # Layer 1 & 2 Data
     strat = results.get('strategy', {})
     doc.add_heading("Layer 1: Strategic Audit", level=1)
     doc.add_paragraph(f"Match Score: {strat.get('match_score', 'N/A')}%")
@@ -61,7 +51,6 @@ def generate_docx_report(company, level, jd, results):
         for bullet in exp.get('Bullets', []):
             doc.add_paragraph(bullet, style='List Bullet')
 
-    # Layer 3 Data
     doc.add_heading("Layer 3: Human Narrative", level=1)
     doc.add_paragraph(results.get('narrative', {}).get('cover_letter_narrative', ''))
 
@@ -69,14 +58,13 @@ def generate_docx_report(company, level, jd, results):
     doc.save(bio)
     return bio.getvalue()
 
-# --- 5. SIDEBAR: PERSONA DISCOVERY (The Pivot) ---
+# --- 5. SIDEBAR: PERSONA DISCOVERY ---
 with st.sidebar:
     st.header("👤 Persona Discovery")
     api_key = st.text_input("DeepSeek API Key", type="password")
     
-    # Generalized inputs for all job seekers
-    user_strengths = st.text_area("Your Top 3 Strengths", placeholder="e.g., Reliability, Python, Problem Solving")
-    user_weaknesses = st.text_area("Gaps/Weaknesses", placeholder="e.g., Public speaking, No SQL experience")
+    user_strengths = st.text_area("Your Top 3 Strengths", placeholder="e.g., Reliability, Python, Grit")
+    user_weaknesses = st.text_area("Gaps/Weaknesses", placeholder="e.g., Public speaking")
     writing_dna = st.selectbox("Writing Style", ["Blunt & Gritty", "Professional", "Academic"])
     
     st.divider()
@@ -84,7 +72,7 @@ with st.sidebar:
     uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
 
     if uploaded_file and st.button("Parse Resume"):
-        with st.spinner("Parsing binary stream..."):
+        with st.spinner("Parsing..."):
             if uploaded_file.type == "application/pdf":
                 with pdfplumber.open(uploaded_file) as pdf:
                     st.session_state.resume_text = "\n".join([p.extract_text() for p in pdf.pages if p.extract_text()])
@@ -93,7 +81,7 @@ with st.sidebar:
                 st.session_state.resume_text = "\n".join([p.text for p in doc.paragraphs])
         st.success("✅ Resume Loaded")
 
-# --- 6. MAIN UI: CONTEXT ---
+# --- 6. MAIN UI ---
 st.title("🚀 Career Orchestrator: Multi-Agent Platform")
 c1, c2 = st.columns(2)
 
@@ -109,15 +97,15 @@ if st.button("🔥 Run Full Optimization") and st.session_state.resume_text:
         st.warning("Enter your API Key in the sidebar.")
     else:
         with st.status("Orchestrating Agents...") as status:
-            # Phase 1: Strategy & Persona Assessment
-            st.write("Phase 1: Analyzing your Persona...")
+            # Phase 1: Strategy & Persona Discovery
+            st.write("Phase 1: Discovering Persona...")
             strat = run_strategy_architect(st.session_state.resume_text, jd_input, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna)
             
             # Phase 2: ATS keyword mapping
             st.write("Phase 2: Optimizing Keywords...")
             ats = run_ats_architect(st.session_state.resume_text, strat.get('missing_gaps', []), jd_input, strat.get('persona_assessment', ''), job_level, company_name, api_key)
             
-            # Phase 3: Human Voice Narrative
+            # Phase 3: Human Voice Narrative (Uses the Persona assessment from Phase 1)
             st.write("Phase 3: Crafting Narrative...")
             narrative = run_human_narrator(st.session_state.resume_text, jd_input, strat.get('persona_assessment', 'Technical Professional'), writing_dna, company_name, api_key)
             
@@ -133,7 +121,6 @@ if st.session_state.final_results:
     res = st.session_state.final_results
     st.divider()
     
-    # Download Button (Contextual Naming)
     report_bytes = generate_docx_report(company_name, job_level, jd_input, res)
     st.download_button(label=f"📥 Download {company_name} Strategy Report", data=report_bytes, file_name=f"{company_name}_Report.docx")
 
@@ -164,3 +151,5 @@ if st.session_state.final_results:
             wav_audio_data = st_audiorec()
             if wav_audio_data:
                 st.info("Record received. Analyzing...")
+
+   
