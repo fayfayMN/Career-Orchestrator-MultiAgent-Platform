@@ -1,34 +1,33 @@
 import json
 from openai import OpenAI
 
-# --- TASK 1: THE GATEKEEPER ---
-def run_integrity_guardian(master_resume, ai_generated_bullets, ai_cover_letter, jd, api_key):
-    """
-    Consolidated Layer 4: Fact-Checker + Interview Coach.
-    Identifies hallucinations and generates the initial drilling questions.
-    """
+# agents/integrity.py (The Consolidated Version)
+def run_integrity_guardian(resume_text, ats_data, narrative_data, gaps, api_key):
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
-
+    
     prompt = f"""
-    ACT AS: A Ruthless Technical Auditor.
-    SOURCE OF TRUTH: {master_resume}
-    AI CONTENT: Bullets: {ai_generated_bullets} | Letter: {ai_cover_letter}
-    
-    TASK: Identify any claims not in the Master Resume. 
-    Then, generate 3 'Grilling' questions (Technical, Gap Strategy, and Grit-based).
-    
+    ACT AS: A Senior Auditor & Interview Strategist.
+    TRUTH: {resume_text[:1500]}
+    GEN-DATA: Bullets: {ats_data} | Letter: {narrative_data}
+
+    TASK:
+    1. AUDIT: Identify hallucinations in Gen-Data not supported by Truth.
+    2. DRILL: Create 3 interview questions based on {gaps}.
+    3. STRATEGIZE: For each question, provide a 'Strategic Hint' bridging their 99.9% USPS accuracy [cite: 2026-03-23] or AGENT.AI win [cite: 2026-01-09] to the problem.
+
     OUTPUT FORMAT (STRICT JSON):
     {{
+      "hallucination_report": "List errors or 'Clean'",
       "integrity_pass": boolean,
-      "hallucination_report": "string",
-      "interview_questions": {{
-          "q1_technical": "string",
-          "q2_gap_strategy": "string",
-          "q3_grit_behavioral": "string"
-      }},
-      "final_verdict": "Approved or Requires Revision"
+      "interview_drills": [
+        {{
+          "question": "string",
+          "strategic_hint": "string"
+        }}
+      ]
     }}
     """
+   
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
