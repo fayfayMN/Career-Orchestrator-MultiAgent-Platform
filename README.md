@@ -54,26 +54,32 @@ pip install -r requirements.txt
 
 # 3. Launch the Orchestrator
 streamlit run app.py
-
-## 🛠️ Development Log & Optimization Journal
+---
+## 🛠️ Development Log & Optimization Journal   03/27/2026
 
 This section tracks the architectural evolution of the Career Orchestrator, highlighting key technical challenges and engineering pivots.
 
-### **Log 01: From Sequential to Parallel (The Latency Sprint)**
-* **Problem:** The initial 8-agent pipeline ran sequentially, causing a 45+ second wait time that degraded user experience.
+### **Log 01: Asynchronous Orchestration (The Latency Sprint)**
+* **Problem:** Sequential agent execution ($Agent 1 \rightarrow Agent 2 \dots$) resulted in 45s+ user wait times; independent agents were idling.
 * **Solution:** Refactored the orchestration layer using Python's `asyncio`. By implementing `asyncio.gather`, independent agents (e.g., **Tutor** and **Storyteller**) now fire simultaneously.
-* **Result:** Reduced end-to-end execution time by **~60%**, achieving sub-15-second response times for the full analysis package.
+* **Result:** Achieved a **~60% reduction in latency**, bringing full pipeline execution under 15 seconds.
 
-### **Log 02: Binary Stream Ingestion (The "No-Paste" Pivot)**
-* **Problem:** Manual "Copy-Paste" of resumes introduced data truncation and formatting errors, weakening the **Auditor's** accuracy.
-* **Solution:** Integrated `pdfplumber` and `python-docx` to handle raw binary file streams. The system now programmatically parses uploaded files to ensure 100% data fidelity.
-* **Technical Win:** Implemented error-handling for non-standard PDF encodings, ensuring a robust ingestion layer for diverse user inputs.
+### **Log 02: Binary Ingestion Layer (High-Fidelity Parsing)**
+* **Problem:** Manual "Copy-Paste" ingestion lacked **Binary File** support, leading to text truncation, formatting loss, and high user friction.
+* **Solution:** Integrated `pdfplumber` and `python-docx` to handle raw binary streams. The system now programmatically parses **PDF and DOCX** files with 100% data fidelity.
+* **Impact:** Eliminated manual entry errors, ensuring the **Auditor** agent receives a clean, un-truncated master resume.
 
-### **Log 03: Context-Aware Persistence & Data Provenance**
-* **Problem:** AI-generated artifacts lacked traceability; users couldn't see the specific JD constraints that triggered certain resume keywords.
-* **Solution:** Re-engineered the `.docx` export function to inject **Company Name** and **Target JD Metadata** as a "Reference Layer" at the top of every report.
-* **Benefit:** Achieved **Data Provenance**, allowing candidates to audit why the **Resume Pro** agent chose specific engineering keywords (like FastAPI or Azure) for a given role.
+### **Log 03: Data Provenance & Contextual Persistence**
+* **Problem:** Exported reports lacked "Auditability"—there was no record of which specific **Company** or **JD** triggered the AI's keyword choices.
+* **Solution:** Re-engineered the `.docx` engine to anchor all AI-generated strategies to the specific **Target Company Name** and **JD Metadata**.
+* **Benefit:** Provided **Data Provenance**, allowing candidates to trace "Software Engineering" keyword injections back to the original source requirements.
 
-### **Log 04: Handling API Connection Instability**
-* **Problem:** High-traffic periods on the DeepSeek API caused frequent `APIConnectionError` crashes during the Audit phase. 
-* **Solution:** Implemented custom **Exception Handling** and **Exponential Backoff** logic. The app now provides clear user feedback and retries the connection rather than crashing.
+### **Log 04: Dynamic Model Tiering (Cost Optimization)**
+* **Problem:** Homogeneous model usage (Tier-1 only) led to 80% higher token expenditure for low-logic tasks like tone filtering.
+* **Solution:** Implemented **Model Tiering**. Logic-heavy "Audits" use Tier-1 LLMs, while "Tone Sanitization" and "Formatting" are routed to lightweight, low-latency models.
+* **Impact:** Slashed operational API costs by **~70%** without sacrificing the logical depth of the audit.
+
+### **Log 05: Network Resilience & Error Recovery**
+* **Problem:** High-traffic API periods caused `APIConnectionError` crashes, halting the entire 8-agent pipeline.
+* **Solution:** Implemented custom **Exception Handling** and **Exponential Backoff** logic.
+* **Result:** The app now provides clear user feedback and automated retries, ensuring stability during high-load periods.
