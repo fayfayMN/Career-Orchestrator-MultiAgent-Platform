@@ -54,7 +54,3 @@ def run_ats_architect(resume_text, jd, job_level, company, api_key, writing_dna)
         return json.loads(response.choices[0].message.content)
     except Exception as e:
         return {"error": str(e)}
-            "optimized_bullets": [], 
-            "persona_alignment_score": "0", 
-            "error": str(e)
-        }
