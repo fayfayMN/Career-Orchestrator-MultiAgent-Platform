@@ -1,32 +1,53 @@
 import streamlit as st
-import pdfplumber
 import sys
 import os
+import pdfplumber
 from io import BytesIO
 from docx import Document
 from gtts import gTTS
 from st_audiorec import st_audiorec
 
-# --- 1. AGGRESSIVE PATH RESILIENCE (Log 05) ---
-# This MUST happen before any 'from agents import...' calls.
+# --- 1. THE PATH FIX (Log 05) ---
+# Get the absolute path of the directory where app.py lives
 root_path = os.path.dirname(os.path.abspath(__file__))
-agents_path = os.path.join(root_path, "agents")
 
-# Add both the root and agents folder to the system search path
-for path in [root_path, agents_path]:
-    if path not in sys.path:
-        sys.path.insert(0, path)
+# Force Python to look in the root folder for the 'agents' package
+if root_path not in sys.path:
+    sys.path.insert(0, root_path)
 
-# --- 2. IMPORT GENERALIZED AGENTS ---
+# --- 2. THE VISUAL DEBUGGER ---
+# This will show up in your sidebar to help us find the mismatch
+with st.sidebar:
+    st.divider()
+    st.subheader("DEBUG: File System")
+    try:
+        visible_files = os.listdir(root_path)
+        st.write(f"Files in Root: {visible_files}")
+        
+        # Check for 'agents' folder specifically (Case Sensitive!)
+        if 'agents' in visible_files:
+            agents_contents = os.listdir(os.path.join(root_path, 'agents'))
+            st.write(f"Inside 'agents/': {agents_contents}")
+        else:
+            st.error("❌ 'agents' folder not found in root!")
+    except Exception as e:
+        st.write(f"Debug Error: {e}")
+    st.divider()
+
+# --- 3. IMPORT GENERALIZED AGENTS ---
 try:
+    # We import directly from the package
     from agents.strategy_arch import run_strategy_architect
     from agents.ats_architect import run_ats_architect
     from agents.human_narrator import run_human_narrator
     from agents.integrity import run_integrity_guardian
 except Exception as e:
     st.error(f"🛑 Critical Load Failure: {e}")
-    st.info("Ensure your folder is named 'agents' (lowercase) and contains '__init__.py' (no spaces, double underscores).")
+    st.info("Check sidebar for folder names. Is it 'agents' or 'Agents'?")
     st.stop()
+
+# --- 4. CONFIGURATION & STATE ---
+st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")stop()
 
 # --- 3. CONFIGURATION & STATE ---
 st.set_page_config(page_title="Career Orchestrator v2.0", layout="wide")
