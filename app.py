@@ -47,15 +47,17 @@ def generate_docx_report(company, level, jd, results):
     doc.add_paragraph(strat.get('learning_syllabus', ''))
     
     # Layer 2: ATS
+    
+    st.write("🤖 Phase 2: ATS Architect...")
     ats = run_ats_architect(
-    st.session_state.resume_text, # 1. Resume
-    jd_input,                     # 2. JD
-    job_level,                    # 3. Level
-    company_name,                 # 4. Company
-    strat.get('missing_gaps', []),# 5. Gaps (Extracted from Phase 1)
-    api_key,                      # 6. DeepSeek Key
-    writing_dna_choice            # 7. Persona DNA
-)
+        st.session_state.resume_text,  # 1. resume_text
+        jd_input,                      # 2. jd
+        job_level,                     # 3. job_level
+        company_name,                  # 4. company
+        strat.get('missing_gaps', []), # 5. gaps
+        api_key,                       # 6. api_key (DeepSeek Key)
+        writing_dna_choice             # 7. writing_dna
+    )
     doc.add_heading("Layer 2: Optimized ATS Bullets", level=1)
     for exp in ats.get('optimized_bullets', []):
         doc.add_heading(exp.get('Role', 'Experience'), level=2)
