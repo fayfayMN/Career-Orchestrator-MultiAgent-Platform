@@ -185,50 +185,52 @@ if st.session_state.final_results:
         drills = res.get('integrity', {}).get('interview_drills', [])
         
         if drills:
-            # 1. State Persistence for Audio
-            if 'last_recording' not in st.session_state:
-                st.session_state.last_recording = None
-    
+            # 1. Initialize session state for the transcript
+            if 'transcript' not in st.session_state:
+                st.session_state.transcript = ""
+
             drill_map = {d['question']: d['strategic_hint'] for d in drills}
             q_selected = st.selectbox("Select Drill:", list(drill_map.keys()))
             
             st.info(f"**Challenge:** {q_selected}")
             with st.expander("💡 View Strategic Hint (Tailored STAR)"):
                 st.write(drill_map[q_selected])
-    
+
             if st.button("📢 Hear Question"):
                 tts = gTTS(text=q_selected, lang='en')
                 audio_fp = BytesIO()
                 tts.write_to_fp(audio_fp)
                 st.audio(audio_fp.getvalue(), format='audio/mp3')
-    
+
             st.divider()
             st.write("Record your answer:")
             
-            # 2. Capture and store audio immediately
+            # 2. Key the recorder to the specific question to prevent data bleeding
             audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key=f'mic_{q_selected}')
             
             if audio_data:
-                st.session_state.last_recording = audio_data['bytes']
-    
-            # 3. Persistent UI Handling
-            if st.session_state.last_recording:
-                st.audio(st.session_state.last_recording)
-                
-                # FIX: We define the text here. 
-                # Ideally, you'd call a transcription agent like OpenAI Whisper here.
-                # For now, we pass a placeholder or the raw data signal.
-                user_answer_text = "Audio response captured and pending analysis." 
+                # In a real-world scenario, you would call Whisper API here to get the text.
+                # For this "Truth & Precision" sprint, we use a status indicator to avoid TypeErrors.
+                st.session_state.transcript = "User provided an audio response. [Analysis Pending Transcript]"
+                st.audio(audio_data['bytes'])
 
-                if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
+            # 3. Grading Logic
+            if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
+                # VALIDATION: Ensure the transcript is a valid string before calling the agent
+                if st.session_state.transcript:
                     with st.spinner("Analyzing your grit..."):
-                        # Now 'user_answer_text' is defined and won't throw a NameError
                         feedback = evaluate_and_reorg_answer(
                             question=q_selected, 
-                            user_transcript=user_answer_text, 
+                            user_transcript=str(st.session_state.transcript), # Force string type
                             api_key=api_key
                         )
                         st.markdown("### 📝 Coach's Blunt Feedback")
                         st.warning(feedback)
+                else:
+                    st.error("❌ Please record an answer first.")
         else:
             st.warning("No drills generated.")
+
+
+     
+       
