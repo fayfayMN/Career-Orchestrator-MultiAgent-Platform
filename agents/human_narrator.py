@@ -39,6 +39,14 @@ def run_human_narrator(resume_text, jd, persona, writing_dna, company, job_level
        - If no metric exists, identify their most significant technical project outcome.
        - PIVOT that specific achievement to solve a core problem found in the {company} JD.
 
+    5. THE TRANSFERABLE BRIDGE: 
+       - INSTRUCTION: Identify the candidate's primary domain (e.g., Finance, USPS, or Healthcare) and a core technical method they used (e.g., normalization, predictive modeling).
+       - PIVOT: Explain how that specific logic applies to {company}'s specific workflow (e.g., PIM, eCommerce, or Supply Chain).
+
+    6. LEARNING AGILITY: 
+       - INSTRUCTION: Search the resume for the candidate's highest academic metric (GPA) and any competitive rankings or awards.
+       - APPLICATION: Use these specific numbers as concrete evidence of how fast they will master {company}'s tools and systems.
+
     VETO: {', '.join(blacklist)}. No long, abstract sentences. Keep it punchy.
     
     OUTPUT FORMAT (STRICT JSON ONLY):
