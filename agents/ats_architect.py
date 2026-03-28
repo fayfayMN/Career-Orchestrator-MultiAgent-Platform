@@ -9,8 +9,6 @@ def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writin
     # This matches the 7-item call from app.py
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
-   
-   
     """
     Dynamic Layer 2: The Impact-First Resume Rewriter.
     Updated to handle 7 arguments to match the app.py handshake.
@@ -22,36 +20,31 @@ def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writin
     verbs = "Analyzed, Modeled, Evaluated, Engineered, Built, Trained, Optimized, Deployed, Designed, Automated"
 
     prompt = f"""
-    ACT AS: A Technical Resume Architect.
-    MANDATE: Rewrite the 'Projects' and 'Experience' sections to match the High-Signal Entry Level format.
+        ACT AS: A Senior Technical Resume Architect.
+        MANDATE: Perform a FULL RECONSTRUCTION of the candidate's history. DO NOT skip any roles.
+        
+        SOURCE DATA: {resume_text}
+        TARGET JD: {jd}
     
-    INPUT:
-    - Resume: {resume_text[:2000]}
-    - Target JD: {jd[:1000]}
-
-    TASK:
-    1. For each Project or Role, identify the core 'Tech Stack' (e.g., Python, SQL, Power BI).
-    2. Rewrite bullets using the 4-step pattern: Problem, Technical Method, Result, and Visualization/Deployment.
-    3. Use 'Workhorse' verbs: Engineered, Normalized, Architected.
-
-    OUTPUT FORMAT (STRICT JSON ONLY):
-    {{
-      "optimized_experience": [
+        TASK:
+        1. EXTRACT ALL: Identify every Project, Role, and Volunteer position (USPS, AGENT.AI, MN Tech for Success, etc.) [cite: 2026-03-23, 2026-03-26, 2026-01-09].
+        2. PHARMA-PIVOT: Tailor EVERY entry to highlight 'Data Integrity', 'Precision', and 'Standard Operating Procedures' (SOPs) for {company}. [cite: 2026-03-28]
+        3. THE FORMULA: 1 Title | Tech Stack line + 4 STAR Bullets (Problem, Method, Result, Impact).
+        4. METRIC ENFORCEMENT: You MUST include the 99.9% USPS accuracy, 70k survey rows, and 1st Place wins. [cite: 2026-03-23, 2026-03-28, 2026-01-09]
+    
+        OUTPUT FORMAT (STRICT JSON ONLY):
         {{
-          "Role": "Project or Job Title",
-          "Tech_Stack": "Python, Pandas, Scikit-learn",
-          "Bullets": [
-            "• Built/Analyzed [Problem] using [Dataset Size] records.",
-            "• Performed [Technical Method/Cleaning] with [Tools].",
-            "• Trained/Applied [Algorithms] achieving [Metric] accuracy/impact [cite: 2026-01-09].",
-            "• Visualized [Outcome] using [Visualization Tool] to [Stakeholder Benefit]."
-          ]
+          "optimized_experience": [
+            {{
+              "Role": "Official Job Title or Project Name",
+              "Tech_Stack": "Relevant tools used",
+              "Bullets": ["• [STAR Bullet 1]", "• [STAR Bullet 2]", "• [STAR Bullet 3]", "• [STAR Bullet 4]"]
+            }}
+          ],
+          "recruiter_scan_verdict": "...",
+          "ats_keywords_hit": []
         }}
-      ],
-      "recruiter_scan_verdict": "...",
-      "ats_keywords_hit": []
-    }}
-    """
+        """
     
     try:
         response = client.chat.completions.create(
