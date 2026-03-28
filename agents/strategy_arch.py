@@ -1,31 +1,37 @@
 import json
 from openai import OpenAI
 
-def run_strategy_architect(resume, jd, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna):
-    """
-    Agent 1 & 2 Hybrid: The Auditor + Tutor
-    Goal: High speed without losing V1 tactical depth.
-    """
+# agents/strategy_arch.py
+import json
+from openai import OpenAI
+
+def run_strategy_architect(resume_text, jd, job_level, company, api_key, strengths, weaknesses, writing_dna):
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
     prompt = f"""
-    ACT AS: Senior Recruiter & Practical Technical Mentor at {company_name}.
+    ACT AS: A Technical Strategy Lead.
+    TASK: Generate a 1-week preparation roadmap for {company}.
     
-    USER CONTEXT:
-    - Target: {company_name} | Level: {job_level} | Style: {writing_dna}
-    - Persona: Strengths({user_strengths}), Gaps({user_weaknesses})
+    INPUTS:
+    - Resume: {resume_text[:1500]}
+    - Gaps identified by user: {weaknesses}
     
-    RESUME: {resume}
-    JOB DESCRIPTION: {jd}
-    
-    TASK: Provide a surgical gap analysis AND a V1-style learning roadmap.
-    
-    OUTPUT FORMAT (STRICT JSON ONLY):
+    MANDATE: 
+    - Provide a specific 7-day syllabus.
+    - Include 1 'Proof-of-Concept' project to close a gap.
+    - Provide resource types (e.g., 'Documentation for AWS S3' or 'LeetCode SQL').
+
+    OUTPUT FORMAT (STRICT JSON):
     {{
       "match_score": 85,
-      "persona_assessment": "Blunt summary of fit and grit",
-      "missing_gaps": ["skill1", "skill2"],
-      "learning_syllabus": "## 🛠️ 48-Hour Technical Sprint\\n### [Skill Name]\\n- **Fundamental:** 2-sentence blunt explanation\\n- **Resource:** Exact YouTube search terms\\n- **Mini-Project:** 2-hour hands-on task\\n- **Interview Script:** 'When they ask, I say...'\\n\\n## 🚀 Quva-Specific Application\\n- [Specific healthcare data utility]"
+      "persona_assessment": "Grizzled Data Realist with 99.9% USPS accuracy [cite: 2026-03-23].",
+      "missing_gaps": ["List 2-3 specific technical gaps"],
+      "learning_syllabus": "## 📅 V1 Strategic 7-Day Sprint\\n
+      - **Day 1-2 (Technical Gaps):** Focus on [Gap 1]. Resource: [Specific Resource].\\n
+      - **Day 3-4 (The Project):** Build a [Mini-Project Name] to demonstrate [Skill].\\n
+      - **Day 5-6 (Compliance/Integrity):** Review HIPAA and Pharmaceutical Data Integrity for {company} [cite: 2026-03-28].\\n
+      - **Day 7 (Simulation):** Final drill focusing on the A3 Team's mission.",
+      "strategic_priority": "Bridge the gap between academic theory and operational reliability."
     }}
     """
     
