@@ -148,4 +148,14 @@ if st.session_state.final_results:
                 audio_fp = BytesIO()
                 tts.write_to_fp(audio_fp)
                 st.audio(audio_fp.getvalue(), format='audio/mp3')
-            st_audiorec()
+            with t3:
+    st.subheader("Interactive Interview Drill")
+    questions = res['integrity'].get('interview_questions', {})
+    if questions:
+        # ... (your selectbox and Hear Question logic) ...
+        
+        st.write("Record your answer:")
+        audio = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
+        if audio:
+            st.audio(audio['bytes'])
+            st.success("Audio captured! Ready for Phase 5 (Analysis).")
