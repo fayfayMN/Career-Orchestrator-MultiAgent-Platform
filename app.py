@@ -213,43 +213,41 @@ if st.session_state.final_results:
         st.text_area("Review your Letter:", letter, height=400)
         st.download_button("📥 Download Report (.docx)", generate_docx_report(company_name, job_level, jd_input, res), file_name=f"{company_name}_Career_Pack.docx")
 
-    # --- app.py (Tab 4) ---
-    with t4:
-        st.subheader("🎙️ Interactive Technical Drill")
-        # Get the list of dynamic drills from the updated agent
-        drills = res.get('integrity', {}).get('interview_drills', [])
+   with t4:
+    st.subheader("🎙️ Interactive Technical Drill")
+    
+    # 1. Access the NEW list-based schema
+    drills = res.get('integrity', {}).get('interview_drills', [])
+    
+    if drills:
+        # 2. Create a map for the dropdown: "Question Text" -> "Hint Text"
+        drill_map = {d['question']: d['strategic_hint'] for d in drills}
+        q_selected = st.selectbox("Select Drill:", list(drill_map.keys()))
         
-        if drills:
-            # Create a dictionary for the selectbox: {QuestionText: HintText}
-            drill_map = {d['question']: d['strategic_hint'] for d in drills}
-            q_selected = st.selectbox("Select Drill:", list(drill_map.keys()))
+        st.info(f"**Challenge:** {q_selected}")
+        
+        # 3. RESTORED: DYNAMIC HINT ENGINE
+        # This now pulls the specific hint tied to the selected question
+        with st.expander("💡 View Strategic Hint (Tailored STAR)"):
+            st.write(drill_map[q_selected])
             
-            st.info(f"**Challenge:** {q_selected}")
+        # 4. AUDIO & RECORDING LOGIC
+        if st.button("📢 Hear Question"):
+            tts = gTTS(text=q_selected, lang='en')
+            audio_fp = BytesIO()
+            tts.write_to_fp(audio_fp)
+            st.audio(audio_fp.getvalue(), format='audio/mp3')
             
-            # DYNAMIC HINT: This now changes based on the selectbox choice
-            with st.expander("💡 View Strategic Hint (Tailored STAR)"):
-                st.write(drill_map[q_selected])
-            
-            if st.button("📢 Hear Question"):
-                tts = gTTS(text=q_selected, lang='en')
-                audio_fp = BytesIO()
-                tts.write_to_fp(audio_fp)
-                st.audio(audio_fp.getvalue(), format='audio/mp3')
-            
-            st.divider()
-            
-            st.write("Record your answer:")
-            audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
-            
-            if audio_data:
-                st.audio(audio_data['bytes'])
-                if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
-                    with st.spinner("Analyzing your grit..."):
-                        # Calling consolidated coach
-                        feedback = evaluate_and_reorg_answer(q_selected, "Audio response captured.", api_key)
-                        st.markdown("### 📝 Coach's Blunt Feedback")
-                        st.warning(feedback)
-                        st.success("✅ Review the 'Perfect STAR Answer' above to calibrate your next attempt.")
-
-    
-    
+        st.divider()
+        st.write("Record your answer:")
+        audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
+        
+        if audio_data:
+            st.audio(audio_data['bytes'])
+            if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
+                with st.spinner("Analyzing your grit..."):
+                    feedback = evaluate_and_reorg_answer(q_selected, "Audio response captured.", api_key)
+                    st.markdown("### 📝 Coach's Blunt Feedback")
+                    st.warning(feedback)
+    else:
+        st.warning("No drills generated. Please check the 'Integrity Guardian' agent output.")
