@@ -1,72 +1,92 @@
 # agents/ats_architect.py
 import json
+import re
 from openai import OpenAI
 
 def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writing_dna):
     """
     Dynamic Layer 2: The Impact-First Resume Rewriter.
-    Tailors resume bullets to any level without hallucinating industry experience.
+    Strictly converts STAR logic into professional resume bullets.
     """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
+    # The prompt now uses 'Negative Constraints' to explicitly ban labels like 'Problem:'
     prompt = f"""
-    ACT AS: An expert Technical Resume Writer.
+    ACT AS: A Senior Technical Resume Architect for {company}.
     MANDATE: STRICT NON-HALLUCINATION. Distinguish between 'Resume Bullets' and 'Interview Logic'.
     
+    INPUT DATA:
+    - Master Resume: {resume_text[:3000]}
+    - Target JD: {jd[:1000]}
+    - Candidate Strengths: High-Grit, Analytical Rigor, Operational Excellence [cite: 2026-03-23, 2026-03-26].
+
     INSTRUCTIONS:
-    1. DISCOVERY: Identify every distinct project/role in: {resume_text[:2000]}.
-    2. THE PIVOT: Tailor technical methods (e.g., Python, SQL, Power BI) as 'Foundations' for {company}'s needs.
-       - RULE: Do NOT claim the user has direct experience in {company}'s specific industry if it is not in the resume.
-       - RULE: Frame existing technical tasks as 'directly applicable foundations' for {company}'s specific needs (e.g., Jira workflows or PIM audits).
-    3. METRIC GROUNDING: 
-       - Identify the candidate's highest quantitative metric or award (e.g., accuracy percentages, rankings, or tenure) [cite: 2026-03-23, 2026-01-09].
-       - Keep these metrics as 'Proof of Operational Reliability' and 'Analytical Rigor' rather than falsely claiming they occurred in {company}'s domain.
-   
+    1. DISCOVERY: Extract every project/role. Pivot technical foundations (Python, SQL, Power BI) to {company}'s needs.
+    2. THE RESUME FORMULA (STRICT): 
+       - Header: **Role/Project Title** | [Tools Used]
+       - Bullet 1 (Action): [Action Verb] + [Technical Task] to solve [Business Problem].
+       - Bullet 2 (Metric): [Action Verb] + [Quantifiable Metric] (e.g., 99.9% accuracy or 70k rows) using [Specific Tool].
+       - Bullet 3 (Impact): [Action Verb] + [Business ROI] (e.g., automated reporting or improved data integrity).
 
-    4. THE RESUME FORMULA (STRICT): 
-       - Header: **Role/Project Title** | [Tools used, e.g., Python, SQL, Power BI]
-       - Bullet 1 (The Hook): [Action Verb] + [Technical Task] to solve [Business Problem].
-       - Bullet 2 (The Metric): [Action Verb] + [Quantifiable Metric] (e.g., 99.9% accuracy or 70k rows) using [Specific Tool]. [cite: 176, 187, 188]
-       - Bullet 3 (The Impact): [Action Verb] + [Business ROI] (e.g., automated reporting or improved data integrity). [cite: 167, 172, 176]
+    3. THE 'LABEL BAN' (CRITICAL): 
+       - DO NOT use tags like 'Problem:', 'Method:', 'Result:', or 'STAR:'.
+       - DO NOT use icons like '✅' or '•' inside the JSON strings.
+       - Every bullet must be a clean, standalone professional sentence starting with a strong Action Verb.
 
-    5. NO LABELS (CRITICAL): 
-       - DO NOT use 'Problem:', 'Technical Method:', 'Result:', or 'Business Impact:' tags.
-       - Every bullet must be a single, professional, seamless sentence starting with a strong Action Verb.
-    
+    4. INDUSTRY FENCE: Frame the candidate's wins (e.g., #1 state ranking or USPS accuracy) as 'Foundational Logic' for {company}. [cite: 2026-01-09, 2026-03-23]
 
     OUTPUT FORMAT (STRICT JSON ONLY):
     {{
       "optimized_experience": [
         {{
-          "Role": "Title",
-          "Tech_Stack": "Tools",
+          "Role": "Professional Title",
+          "Tech_Stack": "Python, SQL, etc.",
           "Bullets": ["Bullet 1", "Bullet 2", "Bullet 3"]
         }}
       ],
-      "recruiter_scan_verdict": "Blunt 1-sentence assessment of grit and fit.",
+      "recruiter_scan_verdict": "Blunt 1-sentence assessment of fit.",
       "ats_keywords_hit": ["Keyword1", "Keyword2"]
     }}
     """
+
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[{"role": "user", "content": prompt}],
-            response_format={'type': 'json_object'}
+            response_format={'type': 'json_object'},
+            temperature=0.3 # Lower temperature ensures more consistent formatting
         )
+        
         content = response.choices[0].message.content.strip()
         
-        # Mandatory: Strip Markdown backticks
-        if content.startswith("```"):
-            content = content.split("```")[1]
-            if content.startswith("json"):
-                content = content[4:]
-            content = content.split("```")[0].strip()
-            
-        return json.loads(content)
+        # --- ROBUST JSON CLEANING ---
+        # Removes Markdown code blocks if the model ignores the response_format instruction
+        content = re.sub(r'```json\s*|```\s*', '', content) 
+        
+        data = json.loads(content)
+
+        # --- POST-PROCESSING: LABEL PURGE ---
+        # Extra safety layer to remove any labels the LLM leaked into the bullets
+        labels_to_strip = ["Problem:", "Method:", "Result:", "Technical Method:", "Business Impact:", "STAR:"]
+        for item in data.get("optimized_experience", []):
+            clean_bullets = []
+            for bullet in item.get("Bullets", []):
+                for label in labels_to_strip:
+                    bullet = bullet.replace(label, "").strip()
+                clean_bullets.append(bullet)
+            item["Bullets"] = clean_bullets
+
+        return data
+
     except Exception as e:
         return {
-            "optimized_experience": [],
-            "recruiter_scan_verdict": f"Error: {str(e)}",
+            "optimized_experience": [
+                {
+                    "Role": "Architectural Error",
+                    "Tech_Stack": "N/A",
+                    "Bullets": [f"System failed to parse resume: {str(e)}"]
+                }
+            ],
+            "recruiter_scan_verdict": "Pipeline fracture detected.",
             "ats_keywords_hit": []
         }
-      
