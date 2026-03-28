@@ -1,36 +1,26 @@
 import json
 from openai import OpenAI
 
+# --- TASK 1: THE GATEKEEPER ---
 def run_integrity_guardian(master_resume, ai_generated_bullets, ai_cover_letter, jd, api_key):
     """
     Consolidated Layer 4: Fact-Checker + Interview Coach.
-    The 'Final Gatekeeper' for data fidelity and interview readiness.
+    Identifies hallucinations and generates the initial drilling questions.
     """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
 
     prompt = f"""
-    ACT AS: A High-Stakes Compliance Auditor and Technical Interviewer.
+    ACT AS: A Ruthless Technical Auditor.
+    SOURCE OF TRUTH: {master_resume}
+    AI CONTENT: Bullets: {ai_generated_bullets} | Letter: {ai_cover_letter}
     
-    SOURCE OF TRUTH (Master Resume): {master_resume}
-    AI GENERATED CONTENT:
-    - Bullets: {ai_generated_bullets}
-    - Cover Letter: {ai_cover_letter}
-    - Target JD: {jd}
-
-    TASK 1: FACT-CHECK (The Veto)
-    Cross-reference the AI content against the Master Resume. Identify any 'Hallucinations' 
-    (skills, dates, or metrics like '1st place' or '70,000 records' that aren't in the source).
+    TASK: Identify any claims not in the Master Resume. 
+    Then, generate 3 'Grilling' questions (Technical, Gap Strategy, and Grit-based).
     
-    TASK 2: INTERVIEW PREP
-    Generate 3 'Grilling' technical questions based on the JD and the candidate's specific background:
-    1. THE DEEP-DIVE: A tool they claim to know (e.g., Python, SQL).
-    2. THE GAP TEST: A challenge involving a skill they are missing from the JD.
-    3. THE GRIT CHECK: A STAR-method question about handling 'messy' situations.
-
     OUTPUT FORMAT (STRICT JSON):
     {{
       "integrity_pass": boolean,
-      "hallucination_report": "List discrepancies or 'CLEAN'",
+      "hallucination_report": "string",
       "interview_questions": {{
           "q1_technical": "string",
           "q2_gap_strategy": "string",
@@ -39,72 +29,41 @@ def run_integrity_guardian(master_resume, ai_generated_bullets, ai_cover_letter,
       "final_verdict": "Approved or Requires Revision"
     }}
     """
-
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
-            messages=[
-                {"role": "system", "content": "You are a ruthless Fact-Checker. Accuracy is 100% required."},
-                {"role": "user", "content": prompt}
-            ],
+            messages=[{"role": "system", "content": "You are a ruthless Fact-Checker."},
+                      {"role": "user", "content": prompt}],
             response_format={'type': 'json_object'}
         )
         return json.loads(response.choices[0].message.content)
     except Exception as e:
-        return {
-            "integrity_pass": False,
-            "hallucination_report": f"Error: {str(e)}",
-            "interview_questions": {},
-            "final_verdict": "System Error"
-        }
+        return {"integrity_pass": False, "hallucination_report": str(e)}
 
+# --- TASK 2: THE EVALUATOR (JSON DATA) ---
 def evaluate_interview_voice(question, transcribed_answer, api_key):
     """
-    The Evaluator: Grades the user's spoken answer based on the STAR method and Technical Accuracy.
-    Used by the Interactive Voice Loop in app.py.
+    The Evaluator: Grades the user's spoken answer for the UI metrics.
     """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
-
-    prompt = f"""
-    ACT AS: A Blunt Technical Interviewer.
-    QUESTION: {question}
-    CANDIDATE ANSWER: {transcribed_answer}
-
-    RUBRIC:
-    1. STAR Method: Did they mention Situation, Task, Action, and a QUANTIFIABLE Result?
-    2. Grit: Is the tone blunt and practical (USPS-style grit)?
-    3. AI-Slop: Penalize them if they used fluff words like 'synergy' or 'leverage'.
+    prompt = f"QUESTION: {question}\nANSWER: {transcribed_answer}\nGrade 1-10 on STAR method and USPS-style grit."
     
-    OUTPUT FORMAT (STRICT JSON):
-    {{
-      "score": "1-10",
-      "blunt_feedback": "string",
-      "star_breakdown": {{
-          "S_T": "string",
-          "Action": "string",
-          "Result": "string"
-      }}
-    }}
-    """
-
     try:
         response = client.chat.completions.create(
             model="deepseek-chat",
-            messages=[
-                {"role": "system", "content": "You are a blunt Interview Evaluator. You hate fluff."},
-                {"role": "user", "content": prompt}
-            ],
+            messages=[{"role": "system", "content": "You are a blunt Interview Evaluator."},
+                      {"role": "user", "content": prompt}],
             response_format={'type': 'json_object'}
         )
         return json.loads(response.choices[0].message.content)
     except Exception as e:
         return {"error": str(e)}
 
-# Add evaluate_and_reorg_answer
+# --- TASK 3: THE REORG COACH (TEXT FEEDBACK) ---
 def evaluate_and_reorg_answer(question, answer, api_key):
     """
-    Consolidated Layer 4/5: The Blunt Coach.
-    Evaluates and Re-architects answers using the STAR method.
+    Consolidated Layer 5: The Blunt Coach.
+    This provides the readable feedback and the 'Perfect' STAR answer.
     """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
@@ -113,15 +72,20 @@ def evaluate_and_reorg_answer(question, answer, api_key):
     USER_RAW_ANSWER: {answer}
     
     TASK:
-    1. BLUNT FEEDBACK: Grade 1-10 on technical grit and clarity.
+    1. BLUNT FEEDBACK: Grade 1-10 on technical grit.
     2. THE REORG (STAR METHOD): Rewrite their answer into a high-impact narrative.
-       - Focus on the 3.9 GPA, #1 AGENT.AI win, and 99.9% USPS accuracy [cite: 2026-03-04, 2026-01-09, 2026-03-23].
+       - Focus on: 3.9 GPA, #1 AGENT.AI win, and 99.9% USPS accuracy [cite: 2026-03-04, 2026-01-09, 2026-03-23].
        - Use 'Workhorse' verbs (Built, Cleaned, Architected).
+    
+    STYLE: Blunt, no fluff.
     """
     
-    response = client.chat.completions.create(
-        model="deepseek-chat",
-        messages=[{"role": "system", "content": "You are a blunt Interview Evaluator. No fluff."},
-                  {"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content
+    try:
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[{"role": "system", "content": "You are a blunt Interview Coach. You hate AI-slop."},
+                      {"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Error connecting to Coach: {str(e)}"
