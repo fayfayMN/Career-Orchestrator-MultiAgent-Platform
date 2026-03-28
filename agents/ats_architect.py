@@ -25,12 +25,16 @@ def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writin
     
     INSTRUCTIONS:
     1. DISCOVERY: Identify EVERY distinct work experience, project, and volunteer block in: {resume_text}. Do not truncate.
-    2. THE PIVOT: Tailor EVERY block to the needs of {company} ({job_level}).
-       - If {company} values 'Data Integrity', find evidence of precision in every role. [cite: 2026-03-28]
-       - If they value 'Automation', find where the candidate improved workflows.
-    3. THE FORMULA (FOR ALL): 
-       - Header: **Role Title** | [Tech Stack/Tools]
-       - 4 Bullets: Problem -> Technical Method -> Result -> Business/Safety Impact.
+
+    2. THE PIVOT: Frame existing projects as 'Technical Foundations' for {company}.
+       - INSTRUCTION: Do NOT claim the user has direct experience in {company}'s specific industry if it is not in the resume.
+       - INSTRUCTION: Instead, frame their technical methods (e.g., Python scripts, SQL queries, or data cleaning) as 'directly applicable foundations' for {company}'s specific needs (e.g., PIM audits or eCommerce automation).
+
+    3. METRIC GROUNDING: 
+       - INSTRUCTION: Identify the candidate's highest quantitative metric or award (e.g., accuracy percentages, rankings, or tenure) [cite: 2026-03-23, 2026-01-09].
+       - INSTRUCTION: Keep these metrics as 'Proof of Operational Reliability' and 'Analytical Rigor' rather than falsely claiming they occurred in {company}'s domain.
+    
+    
     4. METRIC EXTRACTION: Search the resume for every possible number (%, $, row counts, rankings) and embed them into the Result bullets.
 
     OUTPUT FORMAT (STRICT JSON ONLY):
