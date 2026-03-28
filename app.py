@@ -1,3 +1,12 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# NOW you can import your agents
+from agents.strategy_arch import run_strategy_architect
+from agents.ats_architect import run_ats_architect
+from agents.human_narrator import run_human_narrator
+from agents.integrity import run_integrity_guardian
 import streamlit as st
 import pdfplumber
 import asyncio
