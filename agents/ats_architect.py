@@ -21,12 +21,18 @@ def run_ats_architect(resume_text, jd, job_level, company, gaps, api_key, writin
     3. METRIC GROUNDING: 
        - Identify the candidate's highest quantitative metric or award (e.g., accuracy percentages, rankings, or tenure) [cite: 2026-03-23, 2026-01-09].
        - Keep these metrics as 'Proof of Operational Reliability' and 'Analytical Rigor' rather than falsely claiming they occurred in {company}'s domain.
+   
+
     4. THE RESUME FORMULA (STRICT): 
-       - Header: **Role/Project Title** | [Tools Used]
-       - Bullet 1: [Action Verb] + [Technical Task] to solve [Business Problem].
-       - Bullet 2: [Action Verb] + [Quantifiable Metric] (e.g., 99.9% accuracy or 70k rows) using [Tool]. [cite: 2026-03-23, 80, 83]
-       - Bullet 3: [Action Verb] + [Business Impact] (e.g., reduced repeat work or improved data integrity). [cite: 58, 74, 84]
-    5. NO LABELS: Do NOT use 'Problem:', 'Method:', or 'Result:' tags. Use professional, seamless sentences.
+       - Header: **Role/Project Title** | [Tools used, e.g., Python, SQL, Power BI]
+       - Bullet 1 (The Hook): [Action Verb] + [Technical Task] to solve [Business Problem].
+       - Bullet 2 (The Metric): [Action Verb] + [Quantifiable Metric] (e.g., 99.9% accuracy or 70k rows) using [Specific Tool]. [cite: 176, 187, 188]
+       - Bullet 3 (The Impact): [Action Verb] + [Business ROI] (e.g., automated reporting or improved data integrity). [cite: 167, 172, 176]
+
+    5. NO LABELS (CRITICAL): 
+       - DO NOT use 'Problem:', 'Technical Method:', 'Result:', or 'Business Impact:' tags.
+       - Every bullet must be a single, professional, seamless sentence starting with a strong Action Verb.
+    
 
     OUTPUT FORMAT (STRICT JSON ONLY):
     {{
