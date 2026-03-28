@@ -1,23 +1,23 @@
 import json
 from openai import OpenAI
 
-def run_ats_architect(resume_text, gaps, jd, persona_summary, job_level, company, api_key):
+# 1. FIX THE SIGNATURE (Change persona_summary to persona_assessment)
+def run_ats_architect(resume_text, gaps, jd, persona_assessment, job_level, company, api_key):
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
-    # Re-insert the constraints to keep the output blunt and technical
     blacklist = ["synergy", "spearheaded", "passionate", "leverage", "meticulous", "deep-dive"]
 
+    # 2. FIX THE PROMPT (Double the curly braces for the JSON example)
     prompt = f"""
-    ACT AS: A Ruthless ATS Optimization Engineer & 'Hungry Automator'.
+    ACT AS: A Ruthless ATS Optimization Engineer.
     CONTEXT: Target Role at {company} ({job_level}).
-    INPUT: Resume: {resume_text} | Gaps to bridge: {gaps} | JD: {jd}
+    PERSONA: {persona_assessment}
+    INPUT: Resume: {resume_text} | Gaps: {gaps} | JD: {jd}
     
     TASK: Rewrite experience into STAR bullets.
-    - NO 'corporate ego'. Use 'Workhorse' vocabulary (e.g., 'fixed' not 'optimized').
+    - NO 'corporate ego'. Use 'Workhorse' vocabulary.
     - NO BLACKLIST WORDS: {', '.join(blacklist)}.
-    - DATA IS KING: Must include hard metrics from the resume (%, $, #).
-    - MAPPING: Prioritize keywords found in the JD.
-
+    
     OUTPUT FORMAT (STRICT JSON ONLY):
     {{
       "optimized_bullets": [
@@ -32,7 +32,7 @@ def run_ats_architect(resume_text, gaps, jd, persona_summary, job_level, company
         response = client.chat.completions.create(
             model="deepseek-chat",
             messages=[
-                {"role": "system", "content": "You are a blunt career engineer. You hate fluff and AI-slop."},
+                {"role": "system", "content": "You are a blunt career engineer."},
                 {"role": "user", "content": prompt}
             ],
             response_format={'type': 'json_object'}
@@ -40,7 +40,6 @@ def run_ats_architect(resume_text, gaps, jd, persona_summary, job_level, company
         
         content = response.choices[0].message.content.strip()
         
-        # Log 05: Markdown Sanitizer (Surgical Extraction)
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()
         elif "```" in content:
