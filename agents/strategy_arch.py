@@ -2,9 +2,13 @@ import json
 from openai import OpenAI
 
 def run_strategy_architect(resume, jd, job_level, company_name, api_key, user_strengths, user_weaknesses, writing_dna):
+    """
+    Synchronized with app.py (8 parameters).
+    Analyzes gap between resume and JD using DeepSeek.
+    """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
-    # FIX 1: Doubled curly braces in the prompt so Python doesn't crash
+    # We use {{ }} for the JSON structure so the f-string doesn't crash
     prompt = f"""
     ACT AS: Senior Recruiter & Strategy Architect at {company_name}.
     
@@ -19,12 +23,12 @@ def run_strategy_architect(resume, jd, job_level, company_name, api_key, user_st
     JOB DESCRIPTION: {jd}
     
     TASK: Analyze the gap between the candidate and the JD. 
-    OUTPUT: Return ONLY a JSON object with this structure:
+    OUTPUT: Return ONLY a JSON object with this EXACT structure:
     {{
       "match_score": 85,
-      "persona_assessment": "summary",
+      "persona_assessment": "Short summary of fit",
       "missing_gaps": ["gap1", "gap2"],
-      "learning_syllabus": "markdown plan"
+      "learning_syllabus": "Markdown formatted study plan"
     }}
     """
     
@@ -36,7 +40,7 @@ def run_strategy_architect(resume, jd, job_level, company_name, api_key, user_st
         )
         content = response.choices[0].message.content.strip()
         
-        # Markdown Sanitizer
+        # Markdown Sanitizer (Log 05)
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()
         elif "```" in content:
@@ -44,11 +48,11 @@ def run_strategy_architect(resume, jd, job_level, company_name, api_key, user_st
             
         return json.loads(content)
     except Exception as e:
-        # FIX 2: Single curly braces for the actual Python return
+        # Standard Python dictionary for return (Single brackets)
         return {
             "error": str(e), 
             "match_score": 0, 
-            "persona_assessment": "Error in processing", 
+            "persona_assessment": "Error during LLM processing", 
             "missing_gaps": [], 
-            "learning_syllabus": f"Failed to generate: {str(e)}"
+            "learning_syllabus": f"Technical Failure: {str(e)}"
         }
