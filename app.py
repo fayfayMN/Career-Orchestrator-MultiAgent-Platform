@@ -136,7 +136,7 @@ if st.button("🔥 Run Full Optimization"):
             st.rerun() 
         except Exception as e:
             st.error(f"❌ Orchestration Error: {e}")
-
+            
 # --- 9. RESULTS DISPLAY ---
 if st.session_state.final_results:
     res = st.session_state.final_results
@@ -148,6 +148,7 @@ if st.session_state.final_results:
     with col_narr:
         st.info(f"**Persona Fit:** {res['strategy'].get('persona_assessment', 'Standard')}")
     with col_risk:
+        # Fixed alignment
         st.warning(res['narrative'].get('internal_placement_strategy', "Internal Strategy processing..."))
 
     t1, t2, t3, t4 = st.tabs(["📊 Strategy", "📄 ATS Bullets", "✉️ Formal Cover Letter", "🎙️ Voice Practice"])
@@ -157,80 +158,74 @@ if st.session_state.final_results:
         st.markdown(res['strategy'].get('learning_syllabus', ''))
     
     with t2:
-         st.subheader("🎯 ATS-Optimized Impact Bullets")
-    
-        # Safely pull the new dynamic keys
+        st.subheader("🎯 ATS-Optimized Impact Bullets")
+        
+        # 1. Safely pull the dynamic data
         ats_data = res.get('ats', {})
         
         if ats_data:
-            # 1. Display the Recruiter Verdict
             st.success(f"**Recruiter Scan Verdict:** {ats_data.get('recruiter_scan_verdict', 'No verdict generated.')}")
             
-            # 2. Display the Keyword Infiltration List
             keywords = ats_data.get('ats_keywords_hit', [])
             st.write(f"**Keywords Infiltrated:** {', '.join(keywords) if keywords else 'None identified.'}")
             
             st.divider()
     
-            # 3. Iterate through the NEW key: 'optimized_experience'
             experience_list = ats_data.get('optimized_experience', [])
-            
             if experience_list:
                 for item in experience_list:
-                    with st.expander(f"📂 {item.get('Role', 'Unknown Role')}"):
+                    # Logic: Use 'Role' or 'Job Title' fallback
+                    role_title = item.get('Role') or item.get('Job Title') or "Experience Entry"
+                    with st.expander(f"📂 {role_title}"):
                         for bullet in item.get('Bullets', []):
                             st.write(bullet)
             else:
-                st.warning("No experience bullets were generated. Check your agent's JSON output.")
+                st.warning("No experience bullets were generated.")
         else:
-            st.error("ATS Data missing. Please rerun the orchestration.")
+            st.error("ATS Data missing.")
 
     with t3:
         st.subheader("✉️ Formal Persona-Driven Cover Letter")
         letter = res['narrative'].get('cover_letter_narrative', "")
-        st.text_area("Review your Letter:", letter, height=400) # Text area preserves formatting
+        st.text_area("Review your Letter:", letter, height=400)
         st.download_button("📥 Download Report (.docx)", generate_docx_report(company_name, job_level, jd_input, res), file_name=f"{company_name}_Career_Pack.docx")
 
     with t4:
-            st.subheader("🎙️ Interactive Technical Drill")
-            questions = res['integrity'].get('interview_questions', {})
+        st.subheader("🎙️ Interactive Technical Drill")
+        # Fixed internal indent here
+        questions = res['integrity'].get('interview_questions', {})
+        
+        if questions:
+            q_selected = st.selectbox("Select Drill:", list(questions.values()))
+            st.info(f"**Challenge:** {q_selected}")
             
-            if questions:
-                q_selected = st.selectbox("Select Drill:", list(questions.values()))
-                st.info(f"**Challenge:** {q_selected}")
-                
-                # --- RESTORED: THE HINT ENGINE ---
-                with st.expander("💡 View Strategic Hint (STAR Method)"):
-                    st.write("To nail this for the A3 Team, focus on:")
-                    st.write("- **Situation:** Briefly describe the 70,000-row survey or AGENT.AI context [cite: 2026-01-09, 2026-03-11].")
-                    st.write("- **Task:** What was the specific data bottleneck (e.g., messy SQL joins)?")
-                    st.write("- **Action:** Use 'Workhorse' verbs: *Engineered, Normalized, Architected*.")
-                    st.write("- **Result:** Mention the 1st Place win or the 99.9% USPS accuracy [cite: 2026-03-23].")
-                
-                if st.button("📢 Hear Question"):
-                    tts = gTTS(text=q_selected, lang='en')
-                    audio_fp = BytesIO()
-                    tts.write_to_fp(audio_fp)
-                    st.audio(audio_fp.getvalue(), format='audio/mp3')
-                
-                st.divider()
-                
-                # 2. RECORDING INTERFACE
-                st.write("Record your answer:")
-                audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
-                
-                if audio_data:
-                    st.audio(audio_data['bytes'])
-                    
-                    # 3. FEEDBACK & REORG LOOP
-                    if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
-                        with st.spinner("Analyzing your grit..."):
-                            # Calling the consolidated function from agents/integrity.py
-                            feedback = evaluate_and_reorg_answer(q_selected, "Audio response captured.", api_key)
-                            
-                            st.markdown("### 📝 Coach's Blunt Feedback")
-                            st.warning(feedback)
-                            
-                            st.success("✅ Review the 'Perfect STAR Answer' above to calibrate your next attempt.")
+            with st.expander("💡 View Strategic Hint (STAR Method)"):
+                st.write("To nail this for the A3 Team, focus on:")
+                st.write("- **Situation:** Briefly describe the 70,000-row survey or AGENT.AI context [cite: 2026-01-09, 2026-03-11].")
+                st.write("- **Task:** What was the specific data bottleneck (e.g., messy SQL joins)?")
+                st.write("- **Action:** Use 'Workhorse' verbs: *Engineered, Normalized, Architected*.")
+                st.write("- **Result:** Mention the 1st Place win or the 99.9% USPS accuracy [cite: 2026-03-23].")
+            
+            if st.button("📢 Hear Question"):
+                tts = gTTS(text=q_selected, lang='en')
+                audio_fp = BytesIO()
+                tts.write_to_fp(audio_fp)
+                st.audio(audio_fp.getvalue(), format='audio/mp3')
+            
+            st.divider()
+            
+            st.write("Record your answer:")
+            audio_data = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop", key='browser_mic')
+            
+            if audio_data:
+                st.audio(audio_data['bytes'])
+                if st.button("⚖️ Get Blunt Feedback & STAR Reorg"):
+                    with st.spinner("Analyzing your grit..."):
+                        # Calling consolidated coach
+                        feedback = evaluate_and_reorg_answer(q_selected, "Audio response captured.", api_key)
+                        st.markdown("### 📝 Coach's Blunt Feedback")
+                        st.warning(feedback)
+                        st.success("✅ Review the 'Perfect STAR Answer' above to calibrate your next attempt.")
+
     
     
