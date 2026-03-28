@@ -7,29 +7,47 @@ def run_integrity_guardian(resume_text, ats_data, narrative_data, gaps, api_key,
     """
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
-    # Dynamic prompt that DISCOVERS the user's best wins
+    # Dynamic prompt 
+    # agents/integrity.py
+import json
+from openai import OpenAI
+
+def run_integrity_guardian(resume_text, ats_results, narrative_results, gaps, api_key, job_level):
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    
+    # Extract current company from narrative to ensure alignment
+    current_company = narrative_results.get('target_company', 'the target company')
+
     prompt = f"""
     ACT AS: A Technical Interviewer & Career Coach for {job_level} roles.
     TRUTH SOURCE: {resume_text[:2000]}
     IDENTIFIED GAPS: {gaps}
-
-    TASK:
-    1. Generate 3 'Grilling' interview questions tailored to a {job_level} position.
-    2. For EACH question, write a 'Strategic Hint'.
+    MANDATE: ZERO-TOLERANCE for industry bleeding. 
+    
+    CONTEXT:
+    - Current Target Company: {current_company}
+    - Role Level: {job_level}
+    - Optimized Resume Content: {json.dumps(ats_results.get('optimized_experience', []))}
+    Tasks:
+    For EACH question, write a 'Strategic Hint'.
        - MANDATE: Identify the candidate's strongest metric or achievement in the 'TRUTH SOURCE' (e.g., accuracy %, rankings, or long tenure).
        - BRIDGE: Tell the candidate exactly how to pivot that specific win to solve the interviewer's concern.
 
+    STRICT INSTRUCTIONS:
+    1. NO GHOSTING: Do NOT use terminology from healthcare, pharma, or past industries unless they are EXPLICITLY in the current JD.
+    2. THE BRIDGE: Create 3 interview questions that challenge the candidate to apply their 'Grit' (e.g., 99.9% USPS accuracy or AGENT.AI wins) to {current_company}'s specific domain.
+    3. LEVEL-GATING: Ensure the complexity matches a {job_level} role.
+    
     OUTPUT FORMAT (STRICT JSON ONLY):
     {{
       "interview_drills": [
         {{
-          "question": "string",
-          "strategic_hint": "string"
+          "question": "Clear, professional question for {current_company}.",
+          "strategic_hint": "STAR-based hint focusing on transferable logic."
         }}
-      ],
-      "integrity_pass": true
+      ]
     }}
-    """ # <-- Line 70 usually fails here if the closing triple-quotes are missing!
+    """
 
     try:
         response = client.chat.completions.create(
