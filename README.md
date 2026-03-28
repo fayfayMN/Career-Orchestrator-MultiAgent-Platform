@@ -66,15 +66,16 @@ Feature: Integrated gTTS (Text-to-Speech) for voice-over interview simulations.
 
 Feature: Added Binary Ingestion for .docx and .pdf files via pdfplumber and python-docx.
 
-v2.0: The "Truth & Precision" Sprint (03/28/2026)
-Architectural Pivot: Consolidated 8 granular agents into 4 Strategic Microservice Layers to reduce token waste and orchestration overhead.
+v2.0: The **"Truth & Precision" **Sprint (03/28/2026)
+* **Architectural Pivot**: Consolidated 8 granular agents into 4 Strategic Microservice Layers to reduce token waste and orchestration overhead.
 
-Bug Fix (Industry Ghosting): Built a Dynamic Veto List to prevent "Pharma/Medication" terminology from leaking into non-healthcare applications (e.g., Electronics or eCommerce).
+* **Dynamic Handshake Fix**: Universalized all functions to be 100% dynamic; the system now auto-discovers user achievements without hardcoded strings.
 
-Bug Fix (Anti-Hallucination): Re-engineered prompt logic to distinguish between "Verifiable Achievements" and "Learning Goals." The system now frames unfamiliar tools as "Learning Labs" instead of faking job experience.
+* **Binary Export Engine**: Integrated automated Report Downloads in .docx format, anchoring AI strategies to specific company metadata.
 
-UI/UX Fix (Label Removal): Forced a Label Ban in the ATS Architect. Replaced "Problem/Method/Result" tags with professional, seamless action-oriented resume bullets.
+* **Bug Fix (Industry Ghosting)**: Built a Dynamic Veto List to prevent irrelevant terminology (e.g., Pharma/Medication) from leaking into non-healthcare applications.
 
-Logic Fix (Level-Gating): Integrated Seniority-Aware Logic that automatically adjusts the difficulty and tone of the output based on whether the role is "Intern" or "Senior".
+* **Bug Fix (Anti-Hallucination)**: Re-engineered prompt logic to distinguish between "Verifiable Achievements" and "Learning Goals," framing unfamiliar tools as "Learning Labs".
 
+Style Enforcement: Implemented a Label Ban in the ATS Architect to replace "Problem/Method" tags with professional, copy-paste ready resume bullets.
 </details>
