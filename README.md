@@ -1,7 +1,7 @@
 # 🚀 Career Orchestrator: The "No-Fluff" Resume & Interview Engine
-* Versino 1 link : [https://career-orchestrator-multiagent-platform-v1.streamlit.app/](url) 
+* Versino 1 link : [[https://career-orchestrator-multiagent-platform-v1.streamlit.app/](url) ](https://career-orchestrator-multiagent-platformgit-nyoayktbvkpcsbgamg7.streamlit.app/)
 
-* Version 2 link: [https://career-orchestrator-multiagent-platformgit-nyoayktbvkpcsbgamg7.streamlit.app/#interactive-technical-drill](url)
+* Version 2 link: [[https://career-orchestrator-multiagent-platformgit-nyoayktbvkpcsbgamg7.streamlit.app/#interactive-technical-drill](url)](https://career-orchestrator-multiagent-platform-v1.streamlit.app/)
 
 **Stop draining your energy on manual resume tailoring. Let 4 specialized agents bridge the gap between your unique background and the job you want.**
 
